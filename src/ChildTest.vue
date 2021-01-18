@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { watch } from "vue";
-import { InjectionMapping } from "vue-injection-helper";
+import { InjectionMapping } from "./injection-helper";
 export default {
   name: "child-test",
   setup() {

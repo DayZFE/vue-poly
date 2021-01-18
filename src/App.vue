@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import { defineComponent, provide, ref, watch, watchEffect } from "vue";
-import { getInjectionToken } from "vue-injection-helper";
+import { getInjectionToken } from "./injection-helper";
 import ChildTest from "./ChildTest.vue";
 function Test() {
   const test = ref({
