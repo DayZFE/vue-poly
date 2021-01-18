@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "lodash-es": "^4.17.20",
-    "vue": "^3.0.5"
+    "vue": "^3.0.5",
+    "vue-injection-helper": "^0.0.1"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.4",

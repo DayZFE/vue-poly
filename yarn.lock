@@ -1065,6 +1065,14 @@ vscode-web-custom-data@^0.3.2:
   resolved "https://registry.npm.taobao.org/vscode-web-custom-data/download/vscode-web-custom-data-0.3.2.tgz#62a5a924397d8056c5524ff0ff8f14eb815b7066"
   integrity sha1-YqWpJDl9gFbFUk/w/48U64FbcGY=
 
+vue-injection-helper@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/vue-injection-helper/-/vue-injection-helper-0.0.1.tgz#4a2ab7a9d5dd777b865579efac29d8e6645e7bb0"
+  integrity sha512-ZH1UAWYwkRhgQqaQs+qT5d2pp2XD7jO2qw/yklvAid58vB8lKe0RAOD7V43Kc9oYp2MPFr1UPHQhikvt/2cQ1g==
+  dependencies:
+    lodash-es "^4.17.20"
+    vue "^3.0.5"
+
 vue@^3.0.5:
   version "3.0.5"
   resolved "https://registry.npm.taobao.org/vue/download/vue-3.0.5.tgz?cache=0&sync_timestamp=1609359858533&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvue%2Fdownload%2Fvue-3.0.5.tgz#de1b82eba24abfe71e0970fc9b8d4b2babdc3fe1"
