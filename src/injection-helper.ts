@@ -1,4 +1,4 @@
-import { InjectionKey, provide, inject, computed, customRef } from "vue";
+import { InjectionKey, provide, inject, readonly, customRef, Ref } from "vue";
 import { get, set } from "lodash-es";
 
 type FuncService<T> = (...args: any) => T;
@@ -66,66 +66,84 @@ export function OptionalInjection<T>(
 }
 
 /**
- * get provider's mapped ref
+ * provider's mapped ref
  *
  * @export
  * @template P
  * @param {(InjectionKey<unknown> | string)} token
  * @param {string[]} pathProps
+ * once used, provider reactive value can be watched
+ * but performance will decrease
+ * @param {number} [reactiveNodeLayerNum=-1]
+ * if this ref is readonly
+ * not used Vue readony api, so it can't be verified
+ * @param {boolean} [ifReadonly=false]
+ * optional local value
+ * @param {Ref<P>} [local]
  * @returns
  */
-export function InjectionMapped<P>(
+export function InjectionMapping<P>(
   token: InjectionKey<unknown> | string,
   pathProps: string[],
-  reactiveNodeLayerNum: number
+  reactiveNodeLayerNum: number = -1,
+  ifReadonly: boolean = false,
+  local?: Ref<P>
 ) {
   const provider = inject(token, undefined);
-  const value = computed(() => {
-    if (provider) {
-      const providerRef = get(provider, pathProps);
-      return providerRef;
-    }
-    return (undefined as unknown) as P;
-  });
-  const setValue = (val: P) => {
-    if (provider) {
-      const providerRef = get(provider, pathProps);
-      // change value
-      set(provider as any, [...pathProps], val);
-      // announce change
-      if (
-        reactiveNodeLayerNum >= pathProps.length - 1 ||
-        reactiveNodeLayerNum < 1
-      ) {
-        return;
-      }
-      const reactiveKey = pathProps[reactiveNodeLayerNum];
-      const mountingProps = pathProps.slice(0, reactiveNodeLayerNum);
-      const reactivePathProps = pathProps.slice(0, reactiveNodeLayerNum + 1);
-      const mountingNode = get(provider, mountingProps);
-      const reactiveNode = get(provider, reactivePathProps);
-      if (Object.prototype.toString.call(mountingNode) === "[object Object]") {
-        mountingNode[reactiveKey] = { ...reactiveNode };
-      } else if (
-        Object.prototype.toString.call(mountingNode) === "[object Array]"
-      ) {
-        mountingNode[reactiveKey] = [...reactiveNode];
-      } else {
-        mountingNode[reactiveKey] = reactiveNode;
-      }
-    }
-  };
-  return customRef<P>((track: any, trigger: any) => {
+  return customRef<P | undefined>((track: any, trigger: any) => {
     return {
       get: () => {
         track();
         if (provider) {
+          return get(provider, pathProps) as P;
+        } else if (local) {
+          return local.value;
         }
-        return value.value as P;
+        return undefined;
       },
-      set: (newValue) => {
-        setValue(newValue as P);
+      set: (newValue: any) => {
+        if (ifReadonly) return;
+        if (!provider) {
+          if (local) {
+            local.value = newValue as P;
+          } else {
+            return;
+          }
+        }
+        set(provider as any, [...pathProps], newValue);
+        if (reactiveNodeLayerNum < 0) return;
+        // annouce the change to ref/reactive
+        if (
+          reactiveNodeLayerNum >= pathProps.length - 1 ||
+          reactiveNodeLayerNum < 1
+        ) {
+          return;
+        }
+        const reactiveKey = pathProps[reactiveNodeLayerNum];
+        const mountingProps = pathProps.slice(0, reactiveNodeLayerNum);
+        const reactivePathProps = pathProps.slice(0, reactiveNodeLayerNum + 1);
+        const mountingNode = get(provider, mountingProps);
+        const reactiveNode = get(provider, reactivePathProps);
+        if (
+          Object.prototype.toString.call(mountingNode) === "[object Object]"
+        ) {
+          mountingNode[reactiveKey] = { ...reactiveNode };
+        } else if (
+          Object.prototype.toString.call(mountingNode) === "[object Array]"
+        ) {
+          mountingNode[reactiveKey] = [...reactiveNode];
+        } else {
+          mountingNode[reactiveKey] = reactiveNode;
+        }
       },
     };
   });
 }
+
+export default {
+  getMockInstance,
+  getInjectionToken,
+  hideProvider,
+  OptionalInjection,
+  InjectionMapping,
+};

@@ -1,9 +1,16 @@
 {
-  "name": "vuetest",
+  "name": "vue-injection-helper",
   "version": "0.0.0",
+  "description": "Help deal with the problem of provide/inject in vue3+ , such as optinal inject, injection mapping, provider hidding",
+  "license": "MIT",
+  "main": "./esm/injection-helper.js",
+  "module": "./esm/injection-helper.js",
+  "types": "./esm/injection-helper.d.ts",
+  "repository": "https://github.com/DayZFE/vue-injection-helper.git",
   "scripts": {
     "dev": "vite",
-    "build": "vuedx-typecheck . && vite build"
+    "build": "vuedx-typecheck . && vite build",
+    "gen": "tsc --module ES6 --outDir esm"
   },
   "dependencies": {
     "lodash-es": "^4.17.20",

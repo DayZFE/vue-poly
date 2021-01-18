@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import { defineComponent, provide, ref, watch, watchEffect } from "vue";
-import { getInjectionToken, InjectionMapped } from "./injection-helper";
+import { getInjectionToken } from "./injection-helper";
 import ChildTest from "./ChildTest.vue";
 function Test() {
   const test = ref({
@@ -24,6 +24,7 @@ export default {
   setup() {
     const testService = Test();
     provide("test", testService);
+    watch(testService.test, console.log);
     return { testService };
   },
 };

@@ -4,15 +4,18 @@
 
 <script lang="ts">
 import { watch } from "vue";
-import { InjectionMapped } from "./injection-helper";
+import { InjectionMapping } from "./injection-helper";
 export default {
   name: "child-test",
   setup() {
-    const provideRef = InjectionMapped<string>(
+    const provideRef = InjectionMapping<string>("test", [
       "test",
-      ["test", "value", "test", "test", "test", "0"],
-      1
-    );
+      "value",
+      "test",
+      "test",
+      "test",
+      "0",
+    ]);
     return {
       provideRef,
       change(e: any) {
