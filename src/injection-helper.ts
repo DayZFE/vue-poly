@@ -1,4 +1,4 @@
-import { InjectionKey, provide, inject, readonly, customRef, Ref } from "vue";
+import { InjectionKey, provide, inject, customRef, Ref } from "vue";
 import get from "lodash.get";
 import set from "lodash.set";
 
@@ -13,8 +13,7 @@ type ClassService<T> = new (...args: any) => T;
  * @param {(FuncService<T> | ClassService<T>)} service
  * @returns
  */
-// @ts-ignore
-export function getMockInstance<T>(service: FuncService<T> | ClassService<T>) {
+export function getMockInstance<T>(_service: FuncService<T> | ClassService<T>) {
   return (undefined as unknown) as T;
 }
 
@@ -28,7 +27,7 @@ export function getMockInstance<T>(service: FuncService<T> | ClassService<T>) {
  * @returns
  */
 export function getInjectionToken<T>(
-  service: FuncService<T> | ClassService<T>,
+  _service: FuncService<T> | ClassService<T>,
   tokenName?: string | symbol
 ) {
   const token = tokenName || Symbol();
@@ -59,6 +58,8 @@ export function OptionalInjection<T>(
   local: T,
   token: InjectionKey<T> | string
 ) {
+  // return inject(token, undefined) ?? local;
+
   const provider = inject(token, undefined);
   if (!provider) {
     return local;
@@ -73,24 +74,20 @@ export function OptionalInjection<T>(
  * @template P
  * @param {(InjectionKey<unknown> | string)} token
  * @param {string[]} pathProps
- * once used, provider reactive value can be watched
- * but performance will decrease
- * @param {number} [reactiveNodeLayerNum=-1]
- * if this ref is readonly
- * not used Vue readony api, so it can't be verified
- * @param {boolean} [ifReadonly=false]
- * optional local value
- * @param {Ref<P>} [local]
+ * @param {number} [reactiveNodeLayerNum=-1] once used, provider reactive value can be watched but performance will decrease
+ * @param {boolean} [isReadonly=false] if this ref is readonly not used Vue readonly api, so it can't be verified
+ * @param {Ref<P>} [local] optional local value
  * @returns
  */
 export function InjectionMapping<P>(
   token: InjectionKey<unknown> | string,
   pathProps: string[],
   reactiveNodeLayerNum: number = -1,
-  ifReadonly: boolean = false,
+  isReadonly: boolean = false,
   local?: Ref<P>
 ) {
   const provider = inject(token, undefined);
+
   return customRef<P | undefined>((track: any, trigger: any) => {
     return {
       get: () => {
@@ -103,7 +100,7 @@ export function InjectionMapping<P>(
         return undefined;
       },
       set: (newValue: any) => {
-        if (ifReadonly) return;
+        if (isReadonly) return;
         if (!provider) {
           if (local) {
             local.value = newValue as P;
@@ -111,9 +108,10 @@ export function InjectionMapping<P>(
             return;
           }
         }
+
         set(provider as any, [...pathProps], newValue);
         if (reactiveNodeLayerNum < 0) return;
-        // annouce the change to ref/reactive
+        // announce the change to ref/reactive
         if (
           reactiveNodeLayerNum >= pathProps.length - 1 ||
           reactiveNodeLayerNum < 1
@@ -125,6 +123,8 @@ export function InjectionMapping<P>(
         const reactivePathProps = pathProps.slice(0, reactiveNodeLayerNum + 1);
         const mountingNode = get(provider, mountingProps);
         const reactiveNode = get(provider, reactivePathProps);
+
+        // 将新值赋给旧值 - 路径直接覆盖 - 从而触发监听
         if (
           Object.prototype.toString.call(mountingNode) === "[object Object]"
         ) {

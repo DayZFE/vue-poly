@@ -3,19 +3,18 @@
 </template>
 
 <script lang="ts">
-import { watch } from "vue";
 import { InjectionMapping } from "vue-injection-helper";
+
 export default {
   name: "child-test",
+
   setup() {
-    const provideRef = InjectionMapping<string>("test", [
+    const provideRef = InjectionMapping<string>(
       "test",
-      "value",
-      "test",
-      "test",
-      "test",
-      "0",
-    ]);
+      ["test", "value", "test", "test", "test", "0"],
+      1
+    );
+
     return {
       provideRef,
       change(e: any) {
@@ -25,6 +24,3 @@ export default {
   },
 };
 </script>
-
-<style>
-</style>

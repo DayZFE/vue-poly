@@ -1,12 +1,13 @@
 <template>
   <child-test></child-test>
-  <div>{{ testService.test.value.test.test.test[0] }}</div>
+  <div>{{ showValue }}</div>
 </template>
 
 <script lang="ts">
-import { defineComponent, provide, ref, watch, watchEffect } from "vue";
-import { getInjectionToken } from "vue-injection-helper";
+import { computed, provide, ref, watch } from "vue";
+
 import ChildTest from "./ChildTest.vue";
+
 function Test() {
   const test = ref({
     test: {
@@ -15,6 +16,7 @@ function Test() {
       },
     },
   });
+
   return { test };
 }
 
@@ -23,12 +25,14 @@ export default {
   components: { "child-test": ChildTest },
   setup() {
     const testService = Test();
+
     provide("test", testService);
+
     watch(testService.test, console.log);
-    return { testService };
+
+    const showValue = computed(() => testService.test.value.test.test.test[0]);
+
+    return { showValue };
   },
 };
 </script>
-
-<style>
-</style>

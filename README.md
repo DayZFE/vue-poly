@@ -30,7 +30,7 @@ Make it easy to get injection token, with certain type support
 
 ```Typescript
 setup(){
-    const composition = inject(token, defulatValue)
+    const composition = inject(token, defaultValue)
     hideProvider(token)
 }
 ```
@@ -41,10 +41,10 @@ Hide the provider value, so the subtree of components will not get undefined
 
 ```Typescript
 setup(){
-    const localvalue = {
+    const localValue = {
         test: ref('')
     }
-    const value = OptionalInjection(localvalue,token)
+    const value = OptionalInjection(localValue,token)
 }
 ```
 
@@ -77,7 +77,7 @@ setup(){
     // just use it
     const leaveParam = InjectionMapping(token, ['test','value','param','param','param','0'])
     /*
-     * reactive it to provid node
+     * reactive it to provide node
      * that means you can use watch in upper components where you provide it
      * by passing the array key of the path props where the value of ref, or
      * first layer of reactive in

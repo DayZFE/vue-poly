@@ -178,13 +178,6 @@
   resolved "https://registry.npm.taobao.org/@types/braces/download/@types/braces-3.0.0.tgz#7da1c0d44ff1c7eb660a36ec078ea61ba7eb42cb"
   integrity sha1-faHA1E/xx+tmCjbsB46mG6frQss=
 
-"@types/lodash-es@^4.17.4":
-  version "4.17.4"
-  resolved "https://registry.npm.taobao.org/@types/lodash-es/download/@types/lodash-es-4.17.4.tgz#b2e440d2bf8a93584a9fd798452ec497986c9b97"
-  integrity sha1-suRA0r+Kk1hKn9eYRS7El5hsm5c=
-  dependencies:
-    "@types/lodash" "*"
-
 "@types/lodash.get@^4.4.6":
   version "4.4.6"
   resolved "https://registry.npm.taobao.org/@types/lodash.get/download/@types/lodash.get-4.4.6.tgz#0c7ac56243dae0f9f09ab6f75b29471e2e777240"
