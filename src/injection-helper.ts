@@ -1,5 +1,6 @@
 import { InjectionKey, provide, inject, readonly, customRef, Ref } from "vue";
-import { get, set } from "lodash-es";
+import get from "lodash.get";
+import set from "lodash.set";
 
 type FuncService<T> = (...args: any) => T;
 type ClassService<T> = new (...args: any) => T;
