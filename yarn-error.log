@@ -1,8 +1,8 @@
 Arguments: 
-  D:\applications\node\node.exe C:\Users\Pligh\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js install
+  D:\applications\node\node.exe C:\Users\Pligh\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js publish
 
 PATH: 
-  C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;D:\applications\xshell\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;D:\applications\python2;C:\Program Files (x86)\Google\Chrome\Application;C:\WINDOWS\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;D:\applications\node\;%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin;D:\go\bin;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\ProgramData\chocolatey\bin;D:\ruby\Ruby27-x64\bin;C:\Users\Pligh\.cargo\bin;C:\Users\Pligh\AppData\Local\Microsoft\WindowsApps;C:\Users\Pligh\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Pligh\AppData\Roaming\npm;C:\Users\Pligh\go\bin;D:\flutter\bin;C:\Users\Pligh\AppData\Local\.meteor
+  C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;D:\applications\xshell\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;D:\applications\python2;C:\Program Files (x86)\Google\Chrome\Application;C:\WINDOWS\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;D:\applications\node\;%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin;D:\go\bin;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\ProgramData\chocolatey\bin;D:\ruby\Ruby27-x64\bin;C:\Users\Pligh\.cargo\bin;C:\Users\Pligh\AppData\Local\Microsoft\WindowsApps;C:\Users\Pligh\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Pligh\AppData\Roaming\npm;C:\Users\Pligh\go\bin;D:\flutter\bin;C:\Users\Pligh\AppData\Local\.meteor;
 
 Yarn version: 
   1.22.0
@@ -14,23 +14,35 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: EPERM: operation not permitted, unlink 'E:\own\vuetest\node_modules\esbuild\esbuild.exe'
+  Error: https://registry.npm.taobao.org/-/user/org.couchdb.user:plightfield: [conflict] User plightfield already exists
+      at Request.params.callback [as _callback] (C:\Users\Pligh\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:66975:18)
+      at Request.self.callback (C:\Users\Pligh\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140727:22)
+      at Request.emit (events.js:315:20)
+      at Request.<anonymous> (C:\Users\Pligh\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141699:10)
+      at Request.emit (events.js:315:20)
+      at IncomingMessage.<anonymous> (C:\Users\Pligh\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141621:12)
+      at Object.onceWrapper (events.js:421:28)
+      at IncomingMessage.emit (events.js:327:22)
+      at endReadableNT (_stream_readable.js:1224:12)
+      at processTicksAndRejections (internal/process/task_queues.js:84:21)
 
 npm manifest: 
   {
-    "name": "vuetest",
-    "version": "0.0.0",
+    "name": "vue-injection-helper",
+    "version": "0.0.1",
+    "description": "Help deal with the problem of provide/inject in vue3+ , such as optinal inject, injection mapping, provider hidding",
     "license": "MIT",
-    "main": "./",
+    "main": "./esm/injection-helper.js",
+    "module": "./esm/injection-helper.js",
+    "types": "./esm/injection-helper.d.ts",
+    "repository": "https://github.com/DayZFE/vue-injection-helper.git",
     "scripts": {
       "dev": "vite",
       "build": "vuedx-typecheck . && vite build",
       "gen": "tsc --module ES6 --outDir esm"
     },
     "dependencies": {
-      "lodash-es": "^4.17.20"
-    },
-    "peerDependencies": {
+      "lodash-es": "^4.17.20",
       "vue": "^3.0.5"
     },
     "devDependencies": {
@@ -551,7 +563,7 @@ Lockfile:
   
   csstype@^2.6.8:
     version "2.6.14"
-    resolved "https://registry.npm.taobao.org/csstype/download/csstype-2.6.14.tgz?cache=0&sync_timestamp=1610107144219&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcsstype%2Fdownload%2Fcsstype-2.6.14.tgz#004822a4050345b55ad4dcc00be1d9cf2f4296de"
+    resolved "https://registry.npm.taobao.org/csstype/download/csstype-2.6.14.tgz?cache=0&sync_timestamp=1610107098407&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcsstype%2Fdownload%2Fcsstype-2.6.14.tgz#004822a4050345b55ad4dcc00be1d9cf2f4296de"
     integrity sha1-AEgipAUDRbVa1NzAC+HZzy9Clt4=
   
   de-indent@^1.0.2:
@@ -1117,7 +1129,7 @@ Lockfile:
   
   vue@^3.0.5:
     version "3.0.5"
-    resolved "https://registry.npm.taobao.org/vue/download/vue-3.0.5.tgz?cache=0&sync_timestamp=1609359872993&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvue%2Fdownload%2Fvue-3.0.5.tgz#de1b82eba24abfe71e0970fc9b8d4b2babdc3fe1"
+    resolved "https://registry.npm.taobao.org/vue/download/vue-3.0.5.tgz?cache=0&sync_timestamp=1609359858533&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvue%2Fdownload%2Fvue-3.0.5.tgz#de1b82eba24abfe71e0970fc9b8d4b2babdc3fe1"
     integrity sha1-3huC66JKv+ceCXD8m41LK6vcP+E=
     dependencies:
       "@vue/compiler-dom" "3.0.5"
