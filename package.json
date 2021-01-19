@@ -1,6 +1,6 @@
 {
   "name": "vue-injection-helper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "plightfield",
   "description": "Help deal with the problem of provide/inject in vue3+ , such as optinal inject, injection mapping, provider hidding",
   "license": "MIT",
