@@ -109,7 +109,7 @@ export function Aggregation<P>(
     return {
       get: () => {
         track();
-        if (provider) {
+        if (provider !== undefined) {
           if (pathProps.length <= 0) {
             return provider as P;
           }
