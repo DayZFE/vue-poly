@@ -37,18 +37,19 @@ setup(){
 
 Hide the provider value, so the subtree of current components will not get undefined
 
-## OptionalInjection
+## OptionalInjectionModule
 
 ```Typescript
 setup(){
     const localvalue = {
         test: ref('')
     }
-    const value = OptionalInjection(localvalue,token)
+    const value = OptionalInjectionModule(localvalue,token)
 }
 ```
 
 If injection exists, use injected value, otherwise, use the local value
+use it to declare a module, control this module from outside
 
 ## Aggregation
 
@@ -84,6 +85,8 @@ setup(){
     // leaveParam.value = xxx will trigger a warn
 }
 ```
+
+use it within a module
 
 With such tools accelerating your development ——
 

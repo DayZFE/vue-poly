@@ -35,9 +35,10 @@ export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string
  * @template T
  * @param {T} local
  * @param {(InjectionKey<T> | string)} token
+ * @param {boolean} [debug=false]
  * @returns
  */
-export declare function OptionalInjection<T>(local: T, token: InjectionKey<T> | string): T;
+export declare function OptionalInjectionModule<T>(local: T, token: InjectionKey<T> | string, debug?: boolean): T;
 /**
  * provider's mapped ref
  * if provider not exist
@@ -57,7 +58,7 @@ declare const _default: {
     getMockInstance: typeof getMockInstance;
     getInjectionToken: typeof getInjectionToken;
     hideProvider: typeof hideProvider;
-    OptionalInjection: typeof OptionalInjection;
+    OptionalInjectionModule: typeof OptionalInjectionModule;
     Aggregation: typeof Aggregation;
 };
 export default _default;

@@ -1,21 +1,11 @@
-import {
-  InjectionKey,
-  provide,
-  inject,
-  readonly,
-  customRef,
-  Ref,
-  ref,
-  toRaw,
-  UnwrapRef,
-  reactive,
-  isRef,
-} from "vue";
+import { InjectionKey, provide, inject, customRef, Ref, ref, isRef } from "vue";
 import get from "lodash.get";
 import set from "lodash.set";
 
 type FuncService<T> = (...args: any) => T;
 type ClassService<T> = new (...args: any) => T;
+
+const isDev = process.env.NODE_ENV !== "production";
 
 /**
  * mock instance of useFunc
@@ -65,15 +55,21 @@ export function hideProvider<T>(injectionToken: InjectionKey<T> | string) {
  * @template T
  * @param {T} local
  * @param {(InjectionKey<T> | string)} token
+ * @param {boolean} [debug=false]
  * @returns
  */
-export function OptionalInjection<T>(
+export function OptionalInjectionModule<T>(
   local: T,
-  token: InjectionKey<T> | string
+  token: InjectionKey<T> | string,
+  debug: boolean = false
 ) {
   const provider = inject(token, undefined);
   if (!provider) {
     return local;
+  }
+  if (isDev && debug) {
+    // debug injection relationship
+    provide("vue-injection-helper", token);
   }
   return provider;
 }
@@ -105,19 +101,39 @@ export function Aggregation<P>(
   } else {
     local = ref<P>(defaultValue) as Ref<P>;
   }
-  return customRef<P>((track, trigger) => {
+  let moduleToken: string | undefined;
+  if (isDev) {
+    const moduleToken = inject<string | undefined>(
+      "vue-injection-helper",
+      undefined
+    );
+    if (!moduleToken) {
+      console.warn(
+        "[vue-injection-helper]cannot setup a relation with module token"
+      );
+    }
+  }
+  return customRef<P>((track) => {
     return {
       get: () => {
         track();
-        if (provider !== undefined) {
-          if (pathProps.length <= 0) {
-            return provider as P;
+        if (provider === undefined) {
+          if (isDev && moduleToken) {
+            console.warn("[vue-injection-helper]undefined provider");
           }
-          return get(provider, pathProps) as P;
-        } else if (local) {
           return local.value;
         }
-        throw new Error("cannot init a aggregation ref");
+        if (pathProps.length <= 0) {
+          return provider as P;
+        }
+        const providerPathValue = get(provider, pathProps);
+        if (providerPathValue === undefined) {
+          if (isDev && moduleToken) {
+            console.warn("[vue-injection-helper]undefined provider path value");
+          }
+          return local.value;
+        }
+        return providerPathValue;
       },
       set: (newValue: any) => {
         if (ifReadonly || pathProps.length <= 0) {
@@ -138,6 +154,6 @@ export default {
   getMockInstance,
   getInjectionToken,
   hideProvider,
-  OptionalInjection,
+  OptionalInjectionModule,
   Aggregation,
 };
