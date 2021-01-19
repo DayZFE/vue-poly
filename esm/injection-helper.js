@@ -93,9 +93,6 @@ export function Aggregation(token, pathProps, defaultValue, ifReadonly = false) 
             get: () => {
                 track();
                 if (provider === undefined) {
-                    if (isDev && moduleToken) {
-                        console.warn("[vue-injection-helper]undefined provider");
-                    }
                     return local.value;
                 }
                 if (pathProps.length <= 0) {
@@ -103,9 +100,6 @@ export function Aggregation(token, pathProps, defaultValue, ifReadonly = false) 
                 }
                 const providerPathValue = get(provider, pathProps);
                 if (providerPathValue === undefined) {
-                    if (isDev && moduleToken) {
-                        console.warn("[vue-injection-helper]undefined provider path value");
-                    }
                     return local.value;
                 }
                 return providerPathValue;
@@ -116,6 +110,9 @@ export function Aggregation(token, pathProps, defaultValue, ifReadonly = false) 
                     return;
                 }
                 if (!provider) {
+                    if (isDev && moduleToken) {
+                        console.warn("[vue-injection-helper]setting undefined provider");
+                    }
                     local.value = newValue;
                     return;
                 }
