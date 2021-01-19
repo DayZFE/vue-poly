@@ -24,7 +24,7 @@ export default {
   setup() {
     const testService = Test();
     provide("test", testService);
-    watch(testService.test, console.log);
+    watch(testService.test, console.log, { deep: true });
     return { testService };
   },
 };

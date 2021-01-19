@@ -35,7 +35,7 @@ setup(){
 }
 ```
 
-Hide the provider value, so the subtree of components will not get undefined
+Hide the provider value, so the subtree of current components will not get undefined
 
 ## OptionalInjection
 
@@ -48,9 +48,9 @@ setup(){
 }
 ```
 
-If injection exists, use injection value, otherwise, use the local value
+If injection exists, use injected value, otherwise, use the local value
 
-## InjectionMapping
+## Aggregation
 
 ```Typescript
 // you have a Composable
@@ -75,23 +75,16 @@ setup(){
 // just use part of it with injection
 setup(){
     // just use it
-    const leaveParam = InjectionMapping(token, ['test','value','param','param','param','0'])
-    /*
-     * reactive it to provid node
-     * that means you can use watch in upper components where you provide it
-     * by passing the array key of the path props where the value of ref, or
-     * first layer of reactive in
-     * set -1 to close reactive to upper
-     */
-    const leaveParam = InjectionMapping(token, ['test','value','param','param','param','0'],1 )
+    const value = Aggregation(token,['test','value','param','0'],'')
+    // it will return a string ref valued '' if provider not founded
+
+
     /* readonly, usually when you just use a function, or you will not change in current child component tree */
-    const leaveParam = InjectionMapping(token, ['test','value','param','param','param','0'],-1,true )
-    /* local optional*/
-    const local = ref('')
-    ['test','value','param','param','param','0'],-1,false,  local)
+    const leaveParam = Aggregation(token, ['test','value','param','0'],true )
+    // leaveParam.value = xxx will trigger a warn
 }
 ```
 
-With such tools will accelerate your development
+With such tools accelerating your development ——
 
 HaveFun!

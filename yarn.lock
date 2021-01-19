@@ -726,11 +726,6 @@ loader-utils@^1.1.0:
     emojis-list "^3.0.0"
     json5 "^1.0.1"
 
-lodash-es@^4.17.20:
-  version "4.17.20"
-  resolved "https://registry.npm.taobao.org/lodash-es/download/lodash-es-4.17.20.tgz?cache=0&sync_timestamp=1608444851021&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Flodash-es%2Fdownload%2Flodash-es-4.17.20.tgz#29f6332eefc60e849f869c264bc71126ad61e8f7"
-  integrity sha1-KfYzLu/GDoSfhpwmS8cRJq1h6Pc=
-
 lodash.camelcase@^4.3.0:
   version "4.3.0"
   resolved "https://registry.npm.taobao.org/lodash.camelcase/download/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
@@ -1088,14 +1083,6 @@ vscode-web-custom-data@^0.3.2:
   version "0.3.2"
   resolved "https://registry.npm.taobao.org/vscode-web-custom-data/download/vscode-web-custom-data-0.3.2.tgz#62a5a924397d8056c5524ff0ff8f14eb815b7066"
   integrity sha1-YqWpJDl9gFbFUk/w/48U64FbcGY=
-
-vue-injection-helper@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.npmjs.org/vue-injection-helper/-/vue-injection-helper-0.0.1.tgz#4a2ab7a9d5dd777b865579efac29d8e6645e7bb0"
-  integrity sha512-ZH1UAWYwkRhgQqaQs+qT5d2pp2XD7jO2qw/yklvAid58vB8lKe0RAOD7V43Kc9oYp2MPFr1UPHQhikvt/2cQ1g==
-  dependencies:
-    lodash-es "^4.17.20"
-    vue "^3.0.5"
 
 vue@^3.0.5:
   version "3.0.5"

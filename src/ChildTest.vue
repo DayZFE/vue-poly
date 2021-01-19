@@ -1,25 +1,33 @@
 <template>
-  <input :value="provideRef" @input="change" />
+  <input :value="state" @input="change" />
 </template>
 
 <script lang="ts">
 import { watch } from "vue";
-import { InjectionMapping } from "./injection-helper";
+import { Aggregation } from "./injection-helper";
 export default {
   name: "child-test",
   setup() {
-    const provideRef = InjectionMapping<string>("test", [
+    const state = Aggregation<string>(
       "test",
-      "value",
-      "test",
-      "test",
-      "test",
-      "0",
-    ]);
+      ["test", "value", "test", "test", "test", "0"],
+      ""
+    );
+    const test = Aggregation<string>("un-setup-provider", [], "initial");
+    setTimeout(() => {
+      test.value = "non-provider-injection estanblished";
+    }, 1000);
+    watch(
+      test,
+      (res) => {
+        console.log(res);
+      },
+      { immediate: true }
+    );
     return {
-      provideRef,
+      state,
       change(e: any) {
-        provideRef.value = e.target.value;
+        state.value = e.target.value;
       },
     };
   },

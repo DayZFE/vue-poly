@@ -40,27 +40,24 @@ export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string
 export declare function OptionalInjection<T>(local: T, token: InjectionKey<T> | string): T;
 /**
  * provider's mapped ref
+ * if provider not exist
+ * return a local value
+ * recommended for all reactive annoucement
  *
  * @export
  * @template P
  * @param {(InjectionKey<unknown> | string)} token
  * @param {string[]} pathProps
- * once used, provider reactive value can be watched
- * but performance will decrease
- * @param {number} [reactiveNodeLayerNum=-1]
- * if this ref is readonly
- * not used Vue readony api, so it can't be verified
+ * @param {P} defaultValue
  * @param {boolean} [ifReadonly=false]
- * optional local value
- * @param {Ref<P>} [local]
  * @returns
  */
-export declare function InjectionMapping<P>(token: InjectionKey<unknown> | string, pathProps: string[], reactiveNodeLayerNum?: number, ifReadonly?: boolean, local?: Ref<P>): Ref<P | undefined>;
+export declare function Aggregation<P>(token: InjectionKey<unknown> | string, pathProps: string[], defaultValue: P, ifReadonly?: boolean): Ref<P>;
 declare const _default: {
     getMockInstance: typeof getMockInstance;
     getInjectionToken: typeof getInjectionToken;
     hideProvider: typeof hideProvider;
     OptionalInjection: typeof OptionalInjection;
-    InjectionMapping: typeof InjectionMapping;
+    Aggregation: typeof Aggregation;
 };
 export default _default;

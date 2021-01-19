@@ -1,4 +1,4 @@
-import { provide, inject, customRef } from "vue";
+import { provide, inject, customRef, ref, isRef, } from "vue";
 import get from "lodash.get";
 import set from "lodash.set";
 /**
@@ -54,23 +54,27 @@ export function OptionalInjection(local, token) {
 }
 /**
  * provider's mapped ref
+ * if provider not exist
+ * return a local value
+ * recommended for all reactive annoucement
  *
  * @export
  * @template P
  * @param {(InjectionKey<unknown> | string)} token
  * @param {string[]} pathProps
- * once used, provider reactive value can be watched
- * but performance will decrease
- * @param {number} [reactiveNodeLayerNum=-1]
- * if this ref is readonly
- * not used Vue readony api, so it can't be verified
+ * @param {P} defaultValue
  * @param {boolean} [ifReadonly=false]
- * optional local value
- * @param {Ref<P>} [local]
  * @returns
  */
-export function InjectionMapping(token, pathProps, reactiveNodeLayerNum = -1, ifReadonly = false, local) {
+export function Aggregation(token, pathProps, defaultValue, ifReadonly = false) {
     const provider = inject(token, undefined);
+    let local;
+    if (isRef(defaultValue)) {
+        local = defaultValue;
+    }
+    else {
+        local = ref(defaultValue);
+    }
     return customRef((track, trigger) => {
         return {
             get: () => {
@@ -81,41 +85,18 @@ export function InjectionMapping(token, pathProps, reactiveNodeLayerNum = -1, if
                 else if (local) {
                     return local.value;
                 }
-                return undefined;
+                throw new Error("cannot init a aggregation ref");
             },
             set: (newValue) => {
-                if (ifReadonly)
+                if (ifReadonly) {
+                    console.warn("cannot set a readonly aggregation ref");
                     return;
+                }
                 if (!provider) {
-                    if (local) {
-                        local.value = newValue;
-                    }
-                    else {
-                        return;
-                    }
+                    local.value = newValue;
+                    return;
                 }
                 set(provider, [...pathProps], newValue);
-                if (reactiveNodeLayerNum < 0)
-                    return;
-                // annouce the change to ref/reactive
-                if (reactiveNodeLayerNum >= pathProps.length - 1 ||
-                    reactiveNodeLayerNum < 1) {
-                    return;
-                }
-                const reactiveKey = pathProps[reactiveNodeLayerNum];
-                const mountingProps = pathProps.slice(0, reactiveNodeLayerNum);
-                const reactivePathProps = pathProps.slice(0, reactiveNodeLayerNum + 1);
-                const mountingNode = get(provider, mountingProps);
-                const reactiveNode = get(provider, reactivePathProps);
-                if (Object.prototype.toString.call(mountingNode) === "[object Object]") {
-                    mountingNode[reactiveKey] = { ...reactiveNode };
-                }
-                else if (Object.prototype.toString.call(mountingNode) === "[object Array]") {
-                    mountingNode[reactiveKey] = [...reactiveNode];
-                }
-                else {
-                    mountingNode[reactiveKey] = reactiveNode;
-                }
             },
         };
     });
@@ -125,6 +106,6 @@ export default {
     getInjectionToken,
     hideProvider,
     OptionalInjection,
-    InjectionMapping,
+    Aggregation,
 };
 //# sourceMappingURL=injection-helper.js.map
