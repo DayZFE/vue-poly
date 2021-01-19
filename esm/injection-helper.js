@@ -80,6 +80,9 @@ export function Aggregation(token, pathProps, defaultValue, ifReadonly = false) 
             get: () => {
                 track();
                 if (provider) {
+                    if (pathProps.length <= 0) {
+                        return provider;
+                    }
                     return get(provider, pathProps);
                 }
                 else if (local) {
@@ -88,8 +91,8 @@ export function Aggregation(token, pathProps, defaultValue, ifReadonly = false) 
                 throw new Error("cannot init a aggregation ref");
             },
             set: (newValue) => {
-                if (ifReadonly) {
-                    console.warn("cannot set a readonly aggregation ref");
+                if (ifReadonly || pathProps.length <= 0) {
+                    // console.warn("cannot set a readonly aggregation ref");
                     return;
                 }
                 if (!provider) {
