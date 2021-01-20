@@ -46,7 +46,7 @@ export function hideProvider(injectionToken) {
  * @param {T} defaultService
  * @returns
  */
-function Domain(foreignToken, innerToken, defaultService) {
+export function Domain(foreignToken, innerToken, defaultService) {
     const injectionService = inject(foreignToken, undefined);
     let service = injectionService;
     if (injectionService === undefined) {
@@ -65,7 +65,7 @@ function Domain(foreignToken, innerToken, defaultService) {
  * @param {T} [aggregation]
  * @returns
  */
-function Subdomain(subDomainToken, defaultService, aggregation) {
+export function Subdomain(subDomainToken, defaultService, aggregation) {
     let domainExist = true;
     if (!aggregation ||
         Object.prototype.toString.call(aggregation) !== "[object Object]") {

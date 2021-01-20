@@ -37,7 +37,7 @@ export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string
  * @param {T} defaultService
  * @returns
  */
-declare function Domain<T>(foreignToken: string | symbol, innerToken: string | symbol, defaultService: T): T;
+export declare function Domain<T>(foreignToken: string | symbol, innerToken: string | symbol, defaultService: T): T;
 declare type Callback = (...args: any[]) => void;
 declare type AggregationObj = {
     [key: string]: Ref | Callback;
@@ -51,7 +51,7 @@ declare type AggregationObj = {
  * @param {T} [aggregation]
  * @returns
  */
-declare function Subdomain<T extends AggregationObj>(subDomainToken: string | symbol, defaultService: T, aggregation?: T): T;
+export declare function Subdomain<T extends AggregationObj>(subDomainToken: string | symbol, defaultService: T, aggregation?: T): T;
 declare const _default: {
     getMockInstance: typeof getMockInstance;
     getInjectionToken: typeof getInjectionToken;

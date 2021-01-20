@@ -57,7 +57,7 @@ export function hideProvider<T>(injectionToken: InjectionKey<T> | string) {
  * @param {T} defaultService
  * @returns
  */
-function Domain<T>(
+export function Domain<T>(
   foreignToken: string | symbol,
   innerToken: string | symbol,
   defaultService: T
@@ -86,7 +86,7 @@ type AggregationObj = { [key: string]: Ref | Callback };
  * @param {T} [aggregation]
  * @returns
  */
-function Subdomain<T extends AggregationObj>(
+export function Subdomain<T extends AggregationObj>(
   subDomainToken: string | symbol,
   defaultService: T,
   aggregation?: T
