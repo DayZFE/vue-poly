@@ -44,7 +44,10 @@ export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string
  * @param {LinkToken} [outerSource]
  * @returns
  */
-export declare function defineModule<T>(context: T, token: LinkToken, outerSource?: LinkToken): (string | InjectionKey<any> | T)[];
+export declare function defineModule<T>(context: T, token: LinkToken, outerSource?: LinkToken): {
+    innerContext: T;
+    token: LinkToken;
+};
 /**
  * get aggregated domain event
  *
@@ -54,7 +57,7 @@ export declare function defineModule<T>(context: T, token: LinkToken, outerSourc
  * @param {boolean} [showWarn=false]
  * @returns
  */
-declare function aggregateEvent<T extends AggregationFunc>(token: LinkToken, queryPath: string[], showWarn?: boolean): T | (() => void);
+export declare function aggregateEvent<T extends AggregationFunc>(token: LinkToken, queryPath: string[], showWarn?: boolean): T | (() => void);
 /**
  * get aggregated domain ref state
  *
@@ -65,7 +68,7 @@ declare function aggregateEvent<T extends AggregationFunc>(token: LinkToken, que
  * @param {boolean} [showWarn=false]
  * @returns
  */
-declare function aggregateRef<T>(token: LinkToken, queryPath: string[], defaultValue: T, showWarn?: boolean): Ref<T>;
+export declare function aggregateRef<T>(token: LinkToken, queryPath: string[], defaultValue: T, showWarn?: boolean): Ref<T>;
 declare const _default: {
     getMockInstance: typeof getMockInstance;
     getInjectionToken: typeof getInjectionToken;

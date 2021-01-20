@@ -42,8 +42,8 @@ Hide the provider service, so the subtree of current components will not get und
 ```Typescript
 setup(){
     const defaultService = SomeService()
-    const [moduleContext, contextToken] = defineModule(defaultService,'inner-token')
-    const [moduleContextOutOfModule, contextTokenInModule] = defineModule(defaultService,'inner-token','outer-token')
+    const {innerContext:moduleContext, token] = defineModule(defaultService,'inner-token')
+    const [innerContext:moduleContextOutOfModule, token:contextTokenInModule] = defineModule(defaultService,'inner-token','outer-token')
 ```
 
 Generate a Module, with inner or outside context

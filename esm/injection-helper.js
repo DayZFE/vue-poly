@@ -58,7 +58,7 @@ export function defineModule(context, token, outerSource) {
         }
     }
     provide(token, innerContext);
-    return [context, token];
+    return { innerContext, token };
 }
 /**
  * get aggregated domain event
@@ -69,7 +69,7 @@ export function defineModule(context, token, outerSource) {
  * @param {boolean} [showWarn=false]
  * @returns
  */
-function aggregateEvent(token, queryPath, showWarn = false) {
+export function aggregateEvent(token, queryPath, showWarn = false) {
     const provideService = inject(token);
     if (!provideService) {
         if (showWarn) {
@@ -103,7 +103,7 @@ function aggregateEvent(token, queryPath, showWarn = false) {
  * @param {boolean} [showWarn=false]
  * @returns
  */
-function aggregateRef(token, queryPath, defaultValue, showWarn = false) {
+export function aggregateRef(token, queryPath, defaultValue, showWarn = false) {
     if (isRef(defaultValue) || isReactive(defaultValue)) {
         throw new Error("[vue-injection-helper aggregate ref] defaultValue cannot be ref or reactive");
     }

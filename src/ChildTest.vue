@@ -4,16 +4,16 @@
 
 <script lang="ts">
 import { watch } from "vue";
-import { Aggregation } from "./injection-helper";
+import { aggregateRef } from "./injection-helper";
 export default {
   name: "child-test",
   setup() {
-    const state = Aggregation<string>(
+    const state = aggregateRef<string>(
       "test",
       ["test", "value", "test", "test", "test", "0"],
       ""
     );
-    const test = Aggregation<string>("un-setup-provider", [], "initial");
+    const test = aggregateRef<string>("un-setup-provider", [], "initial");
     setTimeout(() => {
       test.value = "non-provider-injection estanblished";
     }, 1000);

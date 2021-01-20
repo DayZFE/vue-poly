@@ -1,11 +1,11 @@
 <template>
   <child-test></child-test>
-  <div>{{ testService.test.value.test.test.test[0] }}</div>
+  <div>{{ service.test.value.test.test.test[0] }}</div>
 </template>
 
 <script lang="ts">
 import { defineComponent, provide, ref, watch, watchEffect } from "vue";
-import { getInjectionToken } from "./injection-helper";
+import { defineModule, getInjectionToken } from "./injection-helper";
 import ChildTest from "./ChildTest.vue";
 function Test() {
   const test = ref({
@@ -23,9 +23,9 @@ export default {
   components: { "child-test": ChildTest },
   setup() {
     const testService = Test();
-    provide("test", testService);
-    watch(testService.test, console.log, { deep: true });
-    return { testService };
+    const { innerContext: service, token } = defineModule(testService, "test");
+    watch(service.test, console.log, { deep: true });
+    return { service };
   },
 };
 </script>

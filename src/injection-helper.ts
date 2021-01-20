@@ -86,7 +86,7 @@ export function defineModule<T>(
     }
   }
   provide(token, innerContext);
-  return [context, token];
+  return { innerContext, token };
 }
 
 /**
@@ -98,7 +98,7 @@ export function defineModule<T>(
  * @param {boolean} [showWarn=false]
  * @returns
  */
-function aggregateEvent<T extends AggregationFunc>(
+export function aggregateEvent<T extends AggregationFunc>(
   token: LinkToken,
   queryPath: string[],
   showWarn: boolean = false
@@ -139,7 +139,7 @@ function aggregateEvent<T extends AggregationFunc>(
  * @param {boolean} [showWarn=false]
  * @returns
  */
-function aggregateRef<T>(
+export function aggregateRef<T>(
   token: LinkToken,
   queryPath: string[],
   defaultValue: T,
