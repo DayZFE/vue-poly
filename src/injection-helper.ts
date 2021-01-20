@@ -51,15 +51,16 @@ export function hideProvider<T>(injectionToken: InjectionKey<T> | string) {
 /**
  * generate a domain by service's token
  *
+ * @export
  * @template T
- * @param {(string | symbol)} foreignToken
- * @param {(string | symbol)} innerToken
+ * @param {(string | symbol | InjectionKey<any>)} foreignToken
+ * @param {(string | symbol | InjectionKey<any>)} innerToken
  * @param {T} defaultService
  * @returns
  */
 export function Domain<T>(
-  foreignToken: string | symbol,
-  innerToken: string | symbol,
+  foreignToken: string | symbol | InjectionKey<any>,
+  innerToken: string | symbol | InjectionKey<any>,
   defaultService: T
 ) {
   const injectionService = inject(foreignToken, undefined);
@@ -80,14 +81,15 @@ type AggregationObj = { [key: string]: Ref | Callback };
 /**
  * generate a subdomain by collection
  *
+ * @export
  * @template T
- * @param {(string | symbol)} subDomainToken
+ * @param {(string | symbol | InjectionKey<any>)} subDomainToken
  * @param {T} defaultService
  * @param {T} [aggregation]
  * @returns
  */
 export function Subdomain<T extends AggregationObj>(
-  subDomainToken: string | symbol,
+  subDomainToken: string | symbol | InjectionKey<any>,
   defaultService: T,
   aggregation?: T
 ) {

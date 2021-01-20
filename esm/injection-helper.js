@@ -40,9 +40,10 @@ export function hideProvider(injectionToken) {
 /**
  * generate a domain by service's token
  *
+ * @export
  * @template T
- * @param {(string | symbol)} foreignToken
- * @param {(string | symbol)} innerToken
+ * @param {(string | symbol | InjectionKey<any>)} foreignToken
+ * @param {(string | symbol | InjectionKey<any>)} innerToken
  * @param {T} defaultService
  * @returns
  */
@@ -59,8 +60,9 @@ export function Domain(foreignToken, innerToken, defaultService) {
 /**
  * generate a subdomain by collection
  *
+ * @export
  * @template T
- * @param {(string | symbol)} subDomainToken
+ * @param {(string | symbol | InjectionKey<any>)} subDomainToken
  * @param {T} defaultService
  * @param {T} [aggregation]
  * @returns

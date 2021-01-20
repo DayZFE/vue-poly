@@ -31,13 +31,14 @@ export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string
 /**
  * generate a domain by service's token
  *
+ * @export
  * @template T
- * @param {(string | symbol)} foreignToken
- * @param {(string | symbol)} innerToken
+ * @param {(string | symbol | InjectionKey<any>)} foreignToken
+ * @param {(string | symbol | InjectionKey<any>)} innerToken
  * @param {T} defaultService
  * @returns
  */
-export declare function Domain<T>(foreignToken: string | symbol, innerToken: string | symbol, defaultService: T): T;
+export declare function Domain<T>(foreignToken: string | symbol | InjectionKey<any>, innerToken: string | symbol | InjectionKey<any>, defaultService: T): T;
 declare type Callback = (...args: any[]) => void;
 declare type AggregationObj = {
     [key: string]: Ref | Callback;
@@ -45,13 +46,14 @@ declare type AggregationObj = {
 /**
  * generate a subdomain by collection
  *
+ * @export
  * @template T
- * @param {(string | symbol)} subDomainToken
+ * @param {(string | symbol | InjectionKey<any>)} subDomainToken
  * @param {T} defaultService
  * @param {T} [aggregation]
  * @returns
  */
-export declare function Subdomain<T extends AggregationObj>(subDomainToken: string | symbol, defaultService: T, aggregation?: T): T;
+export declare function Subdomain<T extends AggregationObj>(subDomainToken: string | symbol | InjectionKey<any>, defaultService: T, aggregation?: T): T;
 declare const _default: {
     getMockInstance: typeof getMockInstance;
     getInjectionToken: typeof getInjectionToken;
