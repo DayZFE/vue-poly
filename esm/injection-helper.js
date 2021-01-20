@@ -1,7 +1,6 @@
-import { provide, inject } from "vue";
+import { provide, inject, customRef, ref, isRef, isReactive, } from "vue";
 import get from "lodash.get";
 import set from "lodash.set";
-const isDev = process.env.NODE_ENV !== "production";
 /**
  * mock instance of useFunc
  *
@@ -38,61 +37,114 @@ export function hideProvider(injectionToken) {
     provide(injectionToken, undefined);
 }
 /**
- * generate a domain by service's token
+ * define a domain module
  *
  * @export
  * @template T
- * @param {(string | symbol | InjectionKey<any>)} foreignToken
- * @param {(string | symbol | InjectionKey<any>)} innerToken
- * @param {T} defaultService
+ * @param {T} context
+ * @param {LinkToken} token
+ * @param {LinkToken} [outerSource]
  * @returns
  */
-export function Domain(foreignToken, innerToken, defaultService) {
-    const injectionService = inject(foreignToken, undefined);
-    let service = injectionService;
-    if (injectionService === undefined) {
-        console.warn(`[vue-injection-heler domain-foreign-token:${foreignToken.toString()}]cannot link the model outside this domain`);
-        service = defaultService;
-    }
-    provide(innerToken, service);
-    return service;
-}
-/**
- * generate a subdomain by collection
- *
- * @export
- * @template T
- * @param {(string | symbol | InjectionKey<any>)} subDomainToken
- * @param {T} defaultService
- * @param {T} [aggregation]
- * @returns
- */
-export function Subdomain(subDomainToken, defaultService, aggregation) {
-    let domainExist = true;
-    if (!aggregation ||
-        Object.prototype.toString.call(aggregation) !== "[object Object]") {
-        console.warn(`[vue-injection-heler sub-domain-token:${subDomainToken.toString()}] lose link, or aggregation muse be object`);
-        domainExist = false;
-    }
-    else {
-        for (let key of Object.keys(aggregation)) {
-            if (aggregation[key] === undefined) {
-                console.warn(`[vue-injection-heler sub-domain-token:${subDomainToken.toString()}] key:${key} lose link`);
-                domainExist = false;
-                break;
-            }
+export function defineModule(context, token, outerSource) {
+    let innerContext = context;
+    if (outerSource) {
+        const result = inject(outerSource);
+        if (result === undefined) {
+            console.warn("[vue-injection-helper]lose link to outerSource");
+        }
+        else {
+            innerContext = result;
         }
     }
-    const service = domainExist ? aggregation : defaultService;
-    provide(subDomainToken, service);
-    return service;
+    provide(token, innerContext);
+    return [context, token];
+}
+/**
+ * get aggregated domain event
+ *
+ * @template T
+ * @param {LinkToken} token
+ * @param {string[]} queryPath
+ * @param {boolean} [showWarn=false]
+ * @returns
+ */
+function aggregateEvent(token, queryPath, showWarn = false) {
+    const provideService = inject(token);
+    if (!provideService) {
+        if (showWarn) {
+            console.warn("[vue-injection-helper aggregate event] lose link");
+        }
+        return () => { };
+    }
+    if (queryPath.length <= 0) {
+        if (showWarn) {
+            console.warn("[vue-injection-helper] queryPath was empty");
+        }
+        return () => { };
+    }
+    const result = get(provideService, queryPath);
+    if (result === undefined ||
+        Object.prototype.toString.call(result) !== "[object Function]") {
+        if (showWarn) {
+            console.warn("[vue-injection-helper] event func not found");
+        }
+        return () => { };
+    }
+    return result;
+}
+/**
+ * get aggregated domain ref state
+ *
+ * @template T
+ * @param {LinkToken} token
+ * @param {string[]} queryPath
+ * @param {T} defaultValue
+ * @param {boolean} [showWarn=false]
+ * @returns
+ */
+function aggregateRef(token, queryPath, defaultValue, showWarn = false) {
+    if (isRef(defaultValue) || isReactive(defaultValue)) {
+        throw new Error("[vue-injection-helper aggregate ref] defaultValue cannot be ref or reactive");
+    }
+    const provideService = inject(token);
+    const localRef = ref(defaultValue);
+    if (!provideService) {
+        if (showWarn) {
+            console.warn("[vue-injection-helper aggregate ref] lose link");
+        }
+        return localRef;
+    }
+    if (queryPath.length <= 0) {
+        if (showWarn) {
+            console.warn("[vue-injection-helper aggregate ref] queryPath was empty");
+        }
+        return localRef;
+    }
+    const result = get(provideService, queryPath);
+    return customRef((track, trigger) => {
+        return {
+            get: () => {
+                track();
+                if (result === undefined) {
+                    console.warn("[vue-injection-helper aggregate ref] received undefined");
+                    return localRef.value;
+                }
+                return result;
+            },
+            set: (newValue) => {
+                set(provideService, queryPath, newValue);
+            },
+        };
+    });
 }
 export default {
     getMockInstance,
     getInjectionToken,
     hideProvider,
-    Domain,
-    Subdomain,
+    defineModule,
+    aggregateEvent,
+    aggregateRef,
     get,
     set,
 };

@@ -1,6 +1,12 @@
 import { InjectionKey, Ref } from "vue";
-declare type FuncService<T> = (...args: any) => T;
-declare type ClassService<T> = new (...args: any) => T;
+export declare type FuncService<T> = (...args: any) => T;
+export declare type ClassService<T> = new (...args: any) => T;
+export declare type AggregationFunc = (...args: any[]) => void;
+export declare type AggregationNode = Ref | AggregationFunc;
+export interface Aggregation {
+    [key: string]: AggregationNode;
+}
+export declare type LinkToken = string | symbol | InjectionKey<any>;
 /**
  * mock instance of useFunc
  *
@@ -29,37 +35,44 @@ export declare function getInjectionToken<T>(service: FuncService<T> | ClassServ
  */
 export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string): void;
 /**
- * generate a domain by service's token
+ * define a domain module
  *
  * @export
  * @template T
- * @param {(string | symbol | InjectionKey<any>)} foreignToken
- * @param {(string | symbol | InjectionKey<any>)} innerToken
- * @param {T} defaultService
+ * @param {T} context
+ * @param {LinkToken} token
+ * @param {LinkToken} [outerSource]
  * @returns
  */
-export declare function Domain<T>(foreignToken: string | symbol | InjectionKey<any>, innerToken: string | symbol | InjectionKey<any>, defaultService: T): T;
-declare type Callback = (...args: any[]) => void;
-declare type AggregationObj = {
-    [key: string]: Ref | Callback;
-};
+export declare function defineModule<T>(context: T, token: LinkToken, outerSource?: LinkToken): (string | InjectionKey<any> | T)[];
 /**
- * generate a subdomain by collection
+ * get aggregated domain event
  *
- * @export
  * @template T
- * @param {(string | symbol | InjectionKey<any>)} subDomainToken
- * @param {T} defaultService
- * @param {T} [aggregation]
+ * @param {LinkToken} token
+ * @param {string[]} queryPath
+ * @param {boolean} [showWarn=false]
  * @returns
  */
-export declare function Subdomain<T extends AggregationObj>(subDomainToken: string | symbol | InjectionKey<any>, defaultService: T, aggregation?: T): T;
+declare function aggregateEvent<T extends AggregationFunc>(token: LinkToken, queryPath: string[], showWarn?: boolean): T | (() => void);
+/**
+ * get aggregated domain ref state
+ *
+ * @template T
+ * @param {LinkToken} token
+ * @param {string[]} queryPath
+ * @param {T} defaultValue
+ * @param {boolean} [showWarn=false]
+ * @returns
+ */
+declare function aggregateRef<T>(token: LinkToken, queryPath: string[], defaultValue: T, showWarn?: boolean): Ref<T>;
 declare const _default: {
     getMockInstance: typeof getMockInstance;
     getInjectionToken: typeof getInjectionToken;
     hideProvider: typeof hideProvider;
-    Domain: typeof Domain;
-    Subdomain: typeof Subdomain;
+    defineModule: typeof defineModule;
+    aggregateEvent: typeof aggregateEvent;
+    aggregateRef: typeof aggregateRef;
     get: {
         <TObject extends object, TKey extends keyof TObject>(object: TObject, path: TKey | [TKey]): TObject[TKey];
         <TObject_1 extends object, TKey_1 extends keyof TObject_1>(object: TObject_1 | null | undefined, path: TKey_1 | [TKey_1]): TObject_1[TKey_1] | undefined;
