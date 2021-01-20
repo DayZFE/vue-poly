@@ -72,6 +72,59 @@ setup(){
 
 use it within a module
 
+## why vue-injection-helper is better
+
+```Typescript
+// if you use vuex
+const service = {
+    state:{
+        name:'',
+        password:'',
+    },
+    mutations:{
+        changeName(){},
+        changePassword(){}
+    }
+}
+// when you want to add some logic
+const service = {
+    state:{
+        name:'',
+        password:'',
+        newState:""
+    },
+    mutations:{
+        changeName(){},
+        changePassword(){},
+        changeNewState(){}
+    }
+}
+// you need to handle two different zone of service
+// and type definition is too hard to management
+
+// when you use vue-injection-helper
+const aggregation = {
+    name: aggregate("service-token",['model','value','name'],'')
+    password:aggregate("service-token",['model','value','password'],'')
+    newState: ref('')
+}
+// if this logic is not part of upper service
+// you can just define a ref here
+
+// meanwhile
+// you can just annouce a aggregation, and link it later
+const aggregation = {
+    name: aggregate("",[],'')
+    password:aggregate("",[],'')
+}
+// or just use ref instead
+const aggregation = {
+    name:ref('')
+    password:ref('')
+}
+
+```
+
 With such tools accelerating your development ——
 
 HaveFun!
