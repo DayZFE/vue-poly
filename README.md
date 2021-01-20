@@ -37,25 +37,24 @@ setup(){
 
 Hide the provider value, so the subtree of current components will not get undefined
 
-## OptionalInjectionModule
+## Domain
 
 ```Typescript
 setup(){
-    const localvalue = {
-        test: ref('')
-    }
-    const value = OptionalInjectionModule(localvalue,token)
+    const defaultService = SomeService()
+    const domain = Domain('out-of-module-token', 'inner-token', defaultService)
 }
 ```
 
-If injection exists, use injected value, otherwise, use the local value
-use it to declare a module, control this module from outside
+Generate a Domain
 
-## Aggregation
+Means that you set up a module
+
+## Subdomain
 
 ```Typescript
 // you have a Composable
-function SomeComposable(){
+function SomeService(){
     return {
         test: ref({
             param:{
@@ -66,23 +65,31 @@ function SomeComposable(){
         })
     }
 }
-const token = getInjectionToken(SomeComposable)
+const serviceToken = getInjectionToken(SomeService)
 // provide it in upper layer components
 setup(){
-    const service = SomeComposable()
+    const service = SomeService()
     provide(token,service)
 }
 
-// just use part of it with injection
+// just use part of it
 setup(){
-    // just use it
-    const value = Aggregation(token,['test','value','param','0'],'')
-    // it will return a string ref valued '' if provider not founded
-
-
-    /* readonly, usually when you just use a function, or you will not change in current child component tree */
-    const leaveParam = Aggregation(token, ['test','value','param','0'],true )
-    // leaveParam.value = xxx will trigger a warn
+    const service = inject(serviceToken,undefined)
+    // declare part of service
+    // use type assignment boldly!
+    // subdomain will handle the undefined type key
+    // eq: name,password
+    const aggregation = {
+        // always use computed to get value
+        name: compunted(()=>service?.model?.value?.test as number)
+        password: computed(()=>get(service, ['test','value']) as string)
+    }
+    const defualtService={
+        name:ref(1)
+        password:ref('')
+    }
+    // set up a Subdomain
+    const subdomain = Subdomain('subdomain-token',defaultService,aggregation)
 }
 ```
 

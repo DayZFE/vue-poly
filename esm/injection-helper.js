@@ -1,4 +1,4 @@
-import { provide, inject, customRef, ref, isRef } from "vue";
+import { provide, inject } from "vue";
 import get from "lodash.get";
 import set from "lodash.set";
 const isDev = process.env.NODE_ENV !== "production";
@@ -38,94 +38,60 @@ export function hideProvider(injectionToken) {
     provide(injectionToken, undefined);
 }
 /**
- * optional injection
+ * generate a domain by service's token
  *
- * @export
  * @template T
- * @param {T} local
- * @param {(InjectionKey<T> | string)} token
- * @param {boolean} [debug=false]
+ * @param {(string | symbol)} foreignToken
+ * @param {(string | symbol)} innerToken
+ * @param {T} defaultService
  * @returns
  */
-export function OptionalInjectionModule(local, token, debug = false) {
-    const provider = inject(token, undefined);
-    if (!provider) {
-        return local;
+function Domain(foreignToken, innerToken, defaultService) {
+    const injectionService = inject(foreignToken, undefined);
+    let service = injectionService;
+    if (injectionService === undefined) {
+        console.warn(`[vue-injection-heler domain-foreign-token:${foreignToken.toString()}]cannot link the model outside this domain`);
+        service = defaultService;
     }
-    if (isDev && debug) {
-        // debug injection relationship
-        provide("vue-injection-helper", token);
-    }
-    return provider;
+    provide(innerToken, service);
+    return service;
 }
 /**
- * provider's mapped ref
- * if provider not exist
- * return a local value
- * recommended for all reactive annoucement
+ * generate a subdomain by collection
  *
- * @export
- * @template P
- * @param {(InjectionKey<unknown> | string)} token
- * @param {string[]} pathProps
- * @param {P} defaultValue
- * @param {boolean} [ifReadonly=false]
+ * @template T
+ * @param {(string | symbol)} subDomainToken
+ * @param {T} defaultService
+ * @param {T} [aggregation]
  * @returns
  */
-export function Aggregation(token, pathProps, defaultValue, ifReadonly = false) {
-    const provider = inject(token, undefined);
-    let local;
-    if (isRef(defaultValue)) {
-        local = defaultValue;
+function Subdomain(subDomainToken, defaultService, aggregation) {
+    let domainExist = true;
+    if (!aggregation ||
+        Object.prototype.toString.call(aggregation) !== "[object Object]") {
+        console.warn(`[vue-injection-heler sub-domain-token:${subDomainToken.toString()}] lose link, or aggregation muse be object`);
+        domainExist = false;
     }
     else {
-        local = ref(defaultValue);
-    }
-    let moduleToken;
-    if (isDev) {
-        const moduleToken = inject("vue-injection-helper", undefined);
-        if (!moduleToken) {
-            console.warn("[vue-injection-helper]cannot setup a relation with module token");
+        for (let key of Object.keys(aggregation)) {
+            if (aggregation[key] === undefined) {
+                console.warn(`[vue-injection-heler sub-domain-token:${subDomainToken.toString()}] key:${key} lose link`);
+                domainExist = false;
+                break;
+            }
         }
     }
-    return customRef((track) => {
-        return {
-            get: () => {
-                track();
-                if (provider === undefined) {
-                    return local.value;
-                }
-                if (pathProps.length <= 0) {
-                    return provider;
-                }
-                const providerPathValue = get(provider, pathProps);
-                if (providerPathValue === undefined) {
-                    return local.value;
-                }
-                return providerPathValue;
-            },
-            set: (newValue) => {
-                if (ifReadonly || pathProps.length <= 0) {
-                    // console.warn("cannot set a readonly aggregation ref");
-                    return;
-                }
-                if (!provider) {
-                    if (isDev && moduleToken) {
-                        console.warn("[vue-injection-helper]setting undefined provider");
-                    }
-                    local.value = newValue;
-                    return;
-                }
-                set(provider, [...pathProps], newValue);
-            },
-        };
-    });
+    const service = domainExist ? aggregation : defaultService;
+    provide(subDomainToken, service);
+    return service;
 }
 export default {
     getMockInstance,
     getInjectionToken,
     hideProvider,
-    OptionalInjectionModule,
-    Aggregation,
+    Domain,
+    Subdomain,
+    get,
+    set,
 };
 //# sourceMappingURL=injection-helper.js.map
