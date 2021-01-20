@@ -164,11 +164,11 @@ export function aggregateRef<T>(
     }
     return localRef;
   }
-  const result = get(provideService, queryPath);
   return customRef<T>((track: any, trigger: any) => {
     return {
       get: () => {
         track();
+        const result = get(provideService, queryPath);
         if (result === undefined) {
           console.warn(
             "[vue-injection-helper aggregate ref] received undefined"
