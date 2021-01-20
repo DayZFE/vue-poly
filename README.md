@@ -5,23 +5,23 @@
 ## getMockInstance
 
 ```Typescript
-const mock = getMockInstance(SomeComposable)
-function AnotherComposable(value: typeof mock){
+const mock = getMockInstance(SomeService)
+function AnotherService(value: typeof mock){
     // ...
 }
 
-const value = SomeComposable()
-AnotherComposable(value)
+const value = SomeService()
+AnotherService(value)
 ```
 
-Generate a mocked instance of Composable (you can call it composition function or just service)
-so that it can be very simple to use with Typescript
+Generate a mocked instance of Service (you can call it composition function or just service)
+so that it would be very simple to use with Typescript
 
 ## getInjectionToken
 
 ```Typescript
-const token = getInjectionToken(SomeComposable)
-const token = getInjectionToken(SomeComposable,'name')
+const token = getInjectionToken(SomeService)
+const token = getInjectionToken(SomeService,'name')
 ```
 
 Make it easy to get injection token, with certain type support
@@ -30,66 +30,43 @@ Make it easy to get injection token, with certain type support
 
 ```Typescript
 setup(){
-    const composition = inject(token, defulatValue)
+    const service = inject(token, defulatValue)
     hideProvider(token)
 }
 ```
 
-Hide the provider value, so the subtree of current components will not get undefined
+Hide the provider service, so the subtree of current components will not get undefined
 
-## Domain
+## defineModule
 
 ```Typescript
 setup(){
     const defaultService = SomeService()
-    const domain = Domain('out-of-module-token', 'inner-token', defaultService)
-}
+    const [moduleContext, contextToken] = defineModule(defaultService,'inner-token')
+    const [moduleContextOutOfModule, contextTokenInModule] = defineModule(defaultService,'inner-token','outer-token')
 ```
 
-Generate a Domain
+Generate a Module, with inner or outside context
 
-Means that you set up a module
+Return the context service and the inner token
 
-## Subdomain
+Set up a module
+
+Isolating the attention
+
+## aggregateEvent & aggregateRef
 
 ```Typescript
-// you have a Composable
-function SomeService(){
-    return {
-        test: ref({
-            param:{
-                param:{
-                    param:['']
-                }
-            }
-        })
-    }
-}
-const serviceToken = getInjectionToken(SomeService)
-// provide it in upper layer components
 setup(){
-    const service = SomeService()
-    provide(token,service)
-}
-
-// just use part of it
-setup(){
-    const service = inject(serviceToken,undefined)
-    // declare part of service
-    // use type assignment boldly!
-    // subdomain will handle the undefined type key
-    // eq: name,password
     const aggregation = {
-        // always use computed to get value
-        name: compunted(()=>service?.model?.value?.test as number)
-        password: computed(()=>get(service, ['test','value']) as string)
+        // aggregateEvent will get the function for boardcast
+        // you shoud assing the type of it
+        change: aggregateEvent<()=>void>('service-in-module-token',['change'])
+        // ref agent part of the service
+        model: aggregateRef('service-in-module-token',['model','value','name'],"")
     }
-    const defualtService={
-        name:ref(1)
-        password:ref('')
-    }
-    // set up a Subdomain
-    const subdomain = Subdomain('subdomain-token',defaultService,aggregation)
+    // you can also set up a new module with it
+    const subModule = defineModule(aggregation,'sub-context-token')
 }
 ```
 
