@@ -8,8 +8,7 @@ import {
   isRef,
   isReactive,
 } from "vue";
-import get from "lodash.get";
-import set from "lodash.set";
+import { get, set } from "lodash-es";
 
 export type FuncService<T> = (...args: any) => T;
 export type ClassService<T> = new (...args: any) => T;

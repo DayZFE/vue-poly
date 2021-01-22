@@ -1,6 +1,6 @@
 {
   "name": "vue-injection-helper",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "author": "plightfield",
   "description": "Help deal with the problem of provide/inject in vue3+ , such as optinal inject, injection mapping, provider hidding",
   "license": "MIT",
@@ -11,17 +11,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vuedx-typecheck . && vite build",
-    "gen": "tsc --module umd --outDir esm"
+    "gen": "tsc  --outDir esm"
   },
   "dependencies": {
-    "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2",
+    "lodash-es": "^4.17.20",
     "vue": "^3.0.5"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.4",
-    "@types/lodash.get": "^4.4.6",
-    "@types/lodash.set": "^4.3.6",
     "@types/node": "^14.14.21",
     "@vitejs/plugin-vue": "^1.0.4",
     "@vue/compiler-sfc": "^3.0.5",

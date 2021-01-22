@@ -4,7 +4,6 @@
 </template>
 
 <script lang="ts">
-import { watch } from "vue";
 import { aggregateEvent, aggregateRef } from "./injection-helper";
 export default {
   name: "child-test",
