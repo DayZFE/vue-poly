@@ -1,6 +1,8 @@
 <template>
   <child-test></child-test>
   <div>{{ service.test.value.test.test.test[0] }}</div>
+  <input v-model="service.test.value.test.test.test[0]" />
+  <button @click="service.change">change</button>
 </template>
 
 <script lang="ts">
@@ -15,7 +17,11 @@ function Test() {
       },
     },
   });
-  return { test };
+  const change = () => {
+    console.log("sdfsdfsdf");
+    test.value.test.test.test[0] = "changed";
+  };
+  return { test, change };
 }
 
 export default {
