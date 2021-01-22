@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vuedx-typecheck . && vite build",
-    "gen": "tsc --module ES6 --outDir esm"
+    "gen": "tsc --module umd --outDir esm"
   },
   "dependencies": {
     "lodash.get": "^4.4.2",
