@@ -14,8 +14,7 @@
       "dom"
     ],
     "types": [
-      "vite/client",
-      "node"
+      "lodash"
     ],
     "plugins": [
       {

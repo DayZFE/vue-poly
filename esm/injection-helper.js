@@ -1,5 +1,5 @@
 import { provide, inject, customRef, ref, isRef, isReactive, } from "vue";
-import { get, set } from "lodash-es";
+import { get, set } from "lodash";
 /**
  * mock instance of useFunc
  *
