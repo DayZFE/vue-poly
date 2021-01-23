@@ -91,7 +91,7 @@ const service = {
     state:{
         name:'',
         password:'',
-        newState:""
+        newState:''
     },
     mutations:{
         changeName(){},
@@ -114,8 +114,8 @@ const aggregation = {
 // meanwhile
 // you can just annouce a aggregation, and link it later
 const aggregation = {
-    name: aggregate("",[],'')
-    password:aggregate("",[],'')
+    name: aggregate('',[],'')
+    password:aggregate('',[],'')
 }
 // or just use ref instead
 const aggregation = {
