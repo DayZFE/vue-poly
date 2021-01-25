@@ -1,41 +1,18 @@
 import { provide, inject, customRef, ref, isRef, isReactive, } from "vue";
 import { get, set } from "lodash";
-export const objGet = get;
-export const objSet = set;
-/**
- * mock instance of useFunc
- *
- * @export
- * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
- * @returns
- */
+export const bondGet = get;
+export const bondSet = set;
 // @ts-ignore
-export function getMockInstance(service) {
-    return undefined;
-}
 /**
- * generate injection token
+ * get mock instance
  *
  * @export
  * @template T
  * @param {(FuncService<T> | ClassService<T>)} service
- * @param {(string | symbol)} [tokenName]
  * @returns
  */
-export function getInjectionToken(service, tokenName) {
-    const token = tokenName || Symbol();
-    return token;
-}
-/**
- * hide suck provider
- *
- * @export
- * @template T
- * @param {(InjectionKey<T> | string)} injectionToken
- */
-export function hideProvider(injectionToken) {
-    provide(injectionToken, undefined);
+export function cataly(service) {
+    return undefined;
 }
 /**
  * define a domain module
@@ -47,7 +24,7 @@ export function hideProvider(injectionToken) {
  * @param {LinkToken} [outerSource]
  * @returns
  */
-export function defineModule(context, token, outerSource) {
+export function definePoly(context, token, outerSource) {
     let innerContext = context;
     if (outerSource) {
         const result = inject(outerSource);
@@ -62,20 +39,23 @@ export function defineModule(context, token, outerSource) {
     return { innerContext, token };
 }
 /**
- *  get static vlaue of injection
+ * get sticky vlaue of aggregation root
  *
  * @export
+ * @template T
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
+ * @param {T} defaultValue
  * @returns
  */
-export function aggregateValue(token, queryPath) {
+export function sticky(token, queryPath, defaultValue) {
     const provideService = inject(token);
     if (!provideService) {
-        return undefined;
+        return defaultValue;
     }
     else {
-        return get(provideService, queryPath);
+        const result = get(provideService, queryPath);
+        return result === undefined ? result : defaultValue;
     }
 }
 /**
@@ -88,7 +68,7 @@ export function aggregateValue(token, queryPath) {
  * @param {boolean} [showWarn=false]
  * @returns
  */
-export function aggregateEvent(token, queryPath, showWarn = false) {
+export function bondEvent(token, queryPath, showWarn = false) {
     const provideService = inject(token);
     if (!provideService) {
         if (showWarn) {
@@ -123,7 +103,7 @@ export function aggregateEvent(token, queryPath, showWarn = false) {
  * @param {boolean} [showWarn=false]
  * @returns
  */
-export function aggregateRef(token, queryPath, defaultValue, showWarn = false) {
+export function bondRef(token, queryPath, defaultValue, showWarn = false) {
     if (isRef(defaultValue) || isReactive(defaultValue)) {
         throw new Error("[vue-injection-helper aggregate ref] defaultValue cannot be ref or reactive");
     }
@@ -159,14 +139,12 @@ export function aggregateRef(token, queryPath, defaultValue, showWarn = false) {
     });
 }
 export default {
-    getMockInstance,
-    getInjectionToken,
-    hideProvider,
-    defineModule,
-    aggregateValue,
-    aggregateEvent,
-    aggregateRef,
-    get,
-    set,
+    cataly,
+    sticky,
+    bondGet,
+    bondSet,
+    bondRef,
+    bondEvent,
+    definePoly,
 };
-//# sourceMappingURL=injection-helper.js.map
+//# sourceMappingURL=vue-poly.js.map

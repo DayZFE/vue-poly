@@ -9,7 +9,7 @@ export interface Aggregation {
 }
 export declare type LinkToken = string | symbol | InjectionKey<any>;
 export declare type QueryPath = PropertyPath;
-export declare const objGet: {
+export declare const bondGet: {
     <TObject extends object, TKey extends keyof TObject>(object: TObject, path: TKey | [TKey]): TObject[TKey];
     <TObject_1 extends object, TKey_1 extends keyof TObject_1>(object: TObject_1 | null | undefined, path: TKey_1 | [TKey_1]): TObject_1[TKey_1] | undefined;
     <TObject_2 extends object, TKey_2 extends keyof TObject_2, TDefault>(object: TObject_2 | null | undefined, path: TKey_2 | [TKey_2], defaultValue: TDefault): TDefault | Exclude<TObject_2[TKey_2], undefined>;
@@ -29,37 +29,19 @@ export declare const objGet: {
     (object: null | undefined, path: import("lodash").Many<string | number | symbol>): undefined;
     (object: any, path: import("lodash").Many<string | number | symbol>, defaultValue?: any): any;
 };
-export declare const objSet: {
+export declare const bondSet: {
     <T extends object>(object: T, path: import("lodash").Many<string | number | symbol>, value: any): T;
     <TResult>(object: object, path: import("lodash").Many<string | number | symbol>, value: any): TResult;
 };
 /**
- * mock instance of useFunc
+ * get mock instance
  *
  * @export
  * @template T
  * @param {(FuncService<T> | ClassService<T>)} service
  * @returns
  */
-export declare function getMockInstance<T>(service: FuncService<T> | ClassService<T>): T;
-/**
- * generate injection token
- *
- * @export
- * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
- * @param {(string | symbol)} [tokenName]
- * @returns
- */
-export declare function getInjectionToken<T>(service: FuncService<T> | ClassService<T>, tokenName?: string | symbol): InjectionKey<T>;
-/**
- * hide suck provider
- *
- * @export
- * @template T
- * @param {(InjectionKey<T> | string)} injectionToken
- */
-export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string): void;
+export declare function cataly<T, P>(service: FuncService<T> | ClassService<T>): T;
 /**
  * define a domain module
  *
@@ -70,19 +52,21 @@ export declare function hideProvider<T>(injectionToken: InjectionKey<T> | string
  * @param {LinkToken} [outerSource]
  * @returns
  */
-export declare function defineModule<T>(context: T, token: LinkToken, outerSource?: LinkToken): {
+export declare function definePoly<T>(context: T, token: LinkToken, outerSource?: LinkToken): {
     innerContext: T;
     token: LinkToken;
 };
 /**
- *  get static vlaue of injection
+ * get sticky vlaue of aggregation root
  *
  * @export
+ * @template T
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
+ * @param {T} defaultValue
  * @returns
  */
-export declare function aggregateValue(token: LinkToken, queryPath: QueryPath): any;
+export declare function sticky<T>(token: LinkToken, queryPath: QueryPath, defaultValue: T): T;
 /**
  * get aggregated domain event
  *
@@ -93,7 +77,7 @@ export declare function aggregateValue(token: LinkToken, queryPath: QueryPath): 
  * @param {boolean} [showWarn=false]
  * @returns
  */
-export declare function aggregateEvent<T extends AggregationFunc>(token: LinkToken, queryPath: QueryPath, showWarn?: boolean): T | (() => void);
+export declare function bondEvent<T extends AggregationFunc>(token: LinkToken, queryPath: QueryPath, showWarn?: boolean): T | (() => void);
 /**
  * get aggregated domain ref state
  *
@@ -105,16 +89,11 @@ export declare function aggregateEvent<T extends AggregationFunc>(token: LinkTok
  * @param {boolean} [showWarn=false]
  * @returns
  */
-export declare function aggregateRef<T>(token: LinkToken, queryPath: QueryPath, defaultValue: T, showWarn?: boolean): Ref<T>;
+export declare function bondRef<T>(token: LinkToken, queryPath: QueryPath, defaultValue: T, showWarn?: boolean): Ref<T>;
 declare const _default: {
-    getMockInstance: typeof getMockInstance;
-    getInjectionToken: typeof getInjectionToken;
-    hideProvider: typeof hideProvider;
-    defineModule: typeof defineModule;
-    aggregateValue: typeof aggregateValue;
-    aggregateEvent: typeof aggregateEvent;
-    aggregateRef: typeof aggregateRef;
-    get: {
+    cataly: typeof cataly;
+    sticky: typeof sticky;
+    bondGet: {
         <TObject extends object, TKey extends keyof TObject>(object: TObject, path: TKey | [TKey]): TObject[TKey];
         <TObject_1 extends object, TKey_1 extends keyof TObject_1>(object: TObject_1 | null | undefined, path: TKey_1 | [TKey_1]): TObject_1[TKey_1] | undefined;
         <TObject_2 extends object, TKey_2 extends keyof TObject_2, TDefault>(object: TObject_2 | null | undefined, path: TKey_2 | [TKey_2], defaultValue: TDefault): TDefault | Exclude<TObject_2[TKey_2], undefined>;
@@ -134,9 +113,12 @@ declare const _default: {
         (object: null | undefined, path: import("lodash").Many<string | number | symbol>): undefined;
         (object: any, path: import("lodash").Many<string | number | symbol>, defaultValue?: any): any;
     };
-    set: {
+    bondSet: {
         <T_3 extends object>(object: T_3, path: import("lodash").Many<string | number | symbol>, value: any): T_3;
         <TResult>(object: object, path: import("lodash").Many<string | number | symbol>, value: any): TResult;
     };
+    bondRef: typeof bondRef;
+    bondEvent: typeof bondEvent;
+    definePoly: typeof definePoly;
 };
 export default _default;

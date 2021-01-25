@@ -20,48 +20,20 @@ export interface Aggregation {
 export type LinkToken = string | symbol | InjectionKey<any>;
 export type QueryPath = PropertyPath;
 
-export const objGet = get;
-export const objSet = set;
+export const bondGet = get;
+export const bondSet = set;
 
-/**
- * mock instance of useFunc
- *
- * @export
- * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
- * @returns
- */
 // @ts-ignore
-export function getMockInstance<T>(service: FuncService<T> | ClassService<T>) {
-  return (undefined as unknown) as T;
-}
-
 /**
- * generate injection token
+ * get mock instance
  *
  * @export
  * @template T
  * @param {(FuncService<T> | ClassService<T>)} service
- * @param {(string | symbol)} [tokenName]
  * @returns
  */
-export function getInjectionToken<T>(
-  service: FuncService<T> | ClassService<T>,
-  tokenName?: string | symbol
-) {
-  const token = tokenName || Symbol();
-  return token as InjectionKey<T>;
-}
-
-/**
- * hide suck provider
- *
- * @export
- * @template T
- * @param {(InjectionKey<T> | string)} injectionToken
- */
-export function hideProvider<T>(injectionToken: InjectionKey<T> | string) {
-  provide(injectionToken, undefined);
+export function cataly<T, P>(service: FuncService<T> | ClassService<T>) {
+  return (undefined as unknown) as T;
 }
 
 /**
@@ -74,7 +46,7 @@ export function hideProvider<T>(injectionToken: InjectionKey<T> | string) {
  * @param {LinkToken} [outerSource]
  * @returns
  */
-export function defineModule<T>(
+export function definePoly<T>(
   context: T,
   token: LinkToken,
   outerSource?: LinkToken
@@ -93,19 +65,26 @@ export function defineModule<T>(
 }
 
 /**
- *  get static vlaue of injection
+ * get sticky vlaue of aggregation root
  *
  * @export
+ * @template T
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
+ * @param {T} defaultValue
  * @returns
  */
-export function aggregateValue(token: LinkToken, queryPath: QueryPath) {
+export function sticky<T>(
+  token: LinkToken,
+  queryPath: QueryPath,
+  defaultValue: T
+) {
   const provideService = inject(token);
   if (!provideService) {
-    return undefined;
+    return defaultValue;
   } else {
-    return get(provideService, queryPath);
+    const result = get(provideService, queryPath) as T;
+    return result === undefined ? result : defaultValue;
   }
 }
 
@@ -119,7 +98,7 @@ export function aggregateValue(token: LinkToken, queryPath: QueryPath) {
  * @param {boolean} [showWarn=false]
  * @returns
  */
-export function aggregateEvent<T extends AggregationFunc>(
+export function bondEvent<T extends AggregationFunc>(
   token: LinkToken,
   queryPath: QueryPath,
   showWarn: boolean = false
@@ -161,7 +140,7 @@ export function aggregateEvent<T extends AggregationFunc>(
  * @param {boolean} [showWarn=false]
  * @returns
  */
-export function aggregateRef<T>(
+export function bondRef<T>(
   token: LinkToken,
   queryPath: QueryPath,
   defaultValue: T,
@@ -207,13 +186,11 @@ export function aggregateRef<T>(
 }
 
 export default {
-  getMockInstance,
-  getInjectionToken,
-  hideProvider,
-  defineModule,
-  aggregateValue,
-  aggregateEvent,
-  aggregateRef,
-  get,
-  set,
+  cataly,
+  sticky,
+  bondGet,
+  bondSet,
+  bondRef,
+  bondEvent,
+  definePoly,
 };
