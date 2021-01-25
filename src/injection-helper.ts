@@ -8,7 +8,7 @@ import {
   isRef,
   isReactive,
 } from "vue";
-import { get, set } from "lodash";
+import { get, set, PropertyPath } from "lodash";
 
 export type FuncService<T> = (...args: any) => T;
 export type ClassService<T> = new (...args: any) => T;
@@ -18,6 +18,10 @@ export interface Aggregation {
   [key: string]: AggregationNode;
 }
 export type LinkToken = string | symbol | InjectionKey<any>;
+export type QueryPath = PropertyPath;
+
+export const objGet = get;
+export const objSet = set;
 
 /**
  * mock instance of useFunc
@@ -89,17 +93,58 @@ export function defineModule<T>(
 }
 
 /**
- * get aggregated domain event
+ * get static vlaue of injection
  *
+ * @export
  * @template T
  * @param {LinkToken} token
- * @param {string[]} queryPath
+ * @param {QueryPath} queryPath
+ * @param {boolean} [showWarn=false]
+ * @returns
+ */
+export function aggregateValue<T>(
+  token: LinkToken,
+  queryPath: QueryPath,
+  showWarn: boolean = false
+) {
+  const provideService = inject(token);
+  if (!provideService) {
+    if (showWarn) {
+      console.warn("[vue-injection-helper aggregate value] lose link");
+    }
+    return null;
+  }
+  if (queryPath === undefined || (queryPath as any)?.length <= 0) {
+    if (showWarn) {
+      console.warn(
+        "[vue-injection-helper aggregate value] queryPath was empty"
+      );
+    }
+    return null;
+  }
+  const result = get(provideService, queryPath);
+  if (result === undefined) {
+    if (showWarn) {
+      console.warn("[vue-injection-helper] value not found");
+    }
+    return null;
+  }
+  return result as T;
+}
+
+/**
+ * get aggregated domain event
+ *
+ * @export
+ * @template T
+ * @param {LinkToken} token
+ * @param {QueryPath} queryPath
  * @param {boolean} [showWarn=false]
  * @returns
  */
 export function aggregateEvent<T extends AggregationFunc>(
   token: LinkToken,
-  queryPath: string[],
+  queryPath: QueryPath,
   showWarn: boolean = false
 ) {
   const provideService = inject(token);
@@ -109,7 +154,7 @@ export function aggregateEvent<T extends AggregationFunc>(
     }
     return () => {};
   }
-  if (queryPath.length <= 0) {
+  if (queryPath === undefined || (queryPath as any)?.length <= 0) {
     if (showWarn) {
       console.warn("[vue-injection-helper] queryPath was empty");
     }
@@ -131,16 +176,17 @@ export function aggregateEvent<T extends AggregationFunc>(
 /**
  * get aggregated domain ref state
  *
+ * @export
  * @template T
  * @param {LinkToken} token
- * @param {string[]} queryPath
+ * @param {QueryPath} queryPath
  * @param {T} defaultValue
  * @param {boolean} [showWarn=false]
  * @returns
  */
 export function aggregateRef<T>(
   token: LinkToken,
-  queryPath: string[],
+  queryPath: QueryPath,
   defaultValue: T,
   showWarn: boolean = false
 ) {
@@ -157,7 +203,7 @@ export function aggregateRef<T>(
     }
     return localRef;
   }
-  if (queryPath.length <= 0) {
+  if (queryPath === undefined || (queryPath as any).length <= 0) {
     if (showWarn) {
       console.warn("[vue-injection-helper aggregate ref] queryPath was empty");
     }
@@ -188,6 +234,7 @@ export default {
   getInjectionToken,
   hideProvider,
   defineModule,
+  aggregateValue,
   aggregateEvent,
   aggregateRef,
   get,

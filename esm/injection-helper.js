@@ -1,5 +1,7 @@
 import { provide, inject, customRef, ref, isRef, isReactive, } from "vue";
 import { get, set } from "lodash";
+export const objGet = get;
+export const objSet = set;
 /**
  * mock instance of useFunc
  *
@@ -60,11 +62,45 @@ export function defineModule(context, token, outerSource) {
     return { innerContext, token };
 }
 /**
- * get aggregated domain event
+ * get static vlaue of injection
  *
+ * @export
  * @template T
  * @param {LinkToken} token
- * @param {string[]} queryPath
+ * @param {QueryPath} queryPath
+ * @param {boolean} [showWarn=false]
+ * @returns
+ */
+export function aggregateValue(token, queryPath, showWarn = false) {
+    const provideService = inject(token);
+    if (!provideService) {
+        if (showWarn) {
+            console.warn("[vue-injection-helper aggregate value] lose link");
+        }
+        return null;
+    }
+    if (queryPath === undefined || queryPath?.length <= 0) {
+        if (showWarn) {
+            console.warn("[vue-injection-helper aggregate value] queryPath was empty");
+        }
+        return null;
+    }
+    const result = get(provideService, queryPath);
+    if (result === undefined) {
+        if (showWarn) {
+            console.warn("[vue-injection-helper] value not found");
+        }
+        return null;
+    }
+    return result;
+}
+/**
+ * get aggregated domain event
+ *
+ * @export
+ * @template T
+ * @param {LinkToken} token
+ * @param {QueryPath} queryPath
  * @param {boolean} [showWarn=false]
  * @returns
  */
@@ -76,7 +112,7 @@ export function aggregateEvent(token, queryPath, showWarn = false) {
         }
         return () => { };
     }
-    if (queryPath.length <= 0) {
+    if (queryPath === undefined || queryPath?.length <= 0) {
         if (showWarn) {
             console.warn("[vue-injection-helper] queryPath was empty");
         }
@@ -95,9 +131,10 @@ export function aggregateEvent(token, queryPath, showWarn = false) {
 /**
  * get aggregated domain ref state
  *
+ * @export
  * @template T
  * @param {LinkToken} token
- * @param {string[]} queryPath
+ * @param {QueryPath} queryPath
  * @param {T} defaultValue
  * @param {boolean} [showWarn=false]
  * @returns
@@ -114,7 +151,7 @@ export function aggregateRef(token, queryPath, defaultValue, showWarn = false) {
         }
         return localRef;
     }
-    if (queryPath.length <= 0) {
+    if (queryPath === undefined || queryPath.length <= 0) {
         if (showWarn) {
             console.warn("[vue-injection-helper aggregate ref] queryPath was empty");
         }
@@ -142,6 +179,7 @@ export default {
     getInjectionToken,
     hideProvider,
     defineModule,
+    aggregateValue,
     aggregateEvent,
     aggregateRef,
     get,

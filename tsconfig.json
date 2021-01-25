@@ -8,13 +8,11 @@
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "lib": [
       "esnext",
       "dom"
-    ],
-    "types": [
-      "lodash"
     ],
     "plugins": [
       {
@@ -25,7 +23,5 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue"
   ]
 }
