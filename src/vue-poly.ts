@@ -5,18 +5,13 @@ import {
   customRef,
   Ref,
   ref,
-  isRef,
-  isReactive,
+  isProxy,
 } from "vue";
 import { get, set, PropertyPath } from "lodash";
 
-export type FuncService<T> = (...args: any) => T;
-export type ClassService<T> = new (...args: any) => T;
+export type FuncFormula<T> = (...args: any) => T;
+export type ClassFormula<T> = new (...args: any) => T;
 export type AggregationFunc = (...args: any[]) => void;
-export type AggregationNode = Ref | AggregationFunc;
-export interface Aggregation {
-  [key: string]: AggregationNode;
-}
 export type LinkToken = string | symbol | InjectionKey<any>;
 export type QueryPath = PropertyPath;
 
@@ -29,10 +24,10 @@ export const bondSet = set;
  *
  * @export
  * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
+ * @param {(FuncFormula<T> | ClassFormula<T>)} formula
  * @returns
  */
-export function cataly<T, P>(service: FuncService<T> | ClassService<T>) {
+export function cataly<T, P>(formula: FuncFormula<T> | ClassFormula<T>) {
   return (undefined as unknown) as T;
 }
 
@@ -41,27 +36,37 @@ export function cataly<T, P>(service: FuncService<T> | ClassService<T>) {
  *
  * @export
  * @template T
- * @param {T} context
+ * @param {T} poly
  * @param {LinkToken} token
- * @param {LinkToken} [outerSource]
- * @returns
+ * @param {LinkToken} [outSourceToken]
+ * @return {*}
  */
-export function definePoly<T>(
-  context: T,
+export function definePoly<T extends { [key: string]: any }>(
+  poly: T,
   token: LinkToken,
-  outerSource?: LinkToken
+  outSourceToken?: LinkToken
 ) {
-  let innerContext = context;
-  if (outerSource) {
-    const result = inject(outerSource);
+  let polyValue = poly;
+  if (outSourceToken) {
+    const result = inject(outSourceToken);
     if (result === undefined) {
-      console.warn("[vue-injection-helper]lose link to outerSource");
+      console.warn("[vue-poly]lose bound to outerSource");
     } else {
-      innerContext = result;
+      polyValue = result;
     }
   }
-  provide(token, innerContext);
-  return { innerContext, token };
+  const __boundStatus = ref({
+    event: 0,
+    value: 0,
+    ref: 0,
+    eventList: [] as QueryPath[],
+    valueList: [] as QueryPath[],
+    refList: [] as QueryPath[],
+    frozenSub: false,
+  });
+
+  provide(token, { ...polyValue, __boundStatus });
+  return __boundStatus;
 }
 
 /**
@@ -79,12 +84,17 @@ export function sticky<T>(
   queryPath: QueryPath,
   defaultValue: T
 ) {
-  const provideService = inject(token);
-  if (!provideService) {
+  const provideFormula = inject(token);
+  if (!provideFormula) {
     return defaultValue;
   } else {
-    const result = get(provideService, queryPath) as T;
-    return result === undefined ? result : defaultValue;
+    const result = get(provideFormula, queryPath) as T;
+    if (result === undefined) {
+      return defaultValue;
+    }
+    provideFormula.__boundStatus.value.value++;
+    provideFormula.__boundStatus.value.valueList.push(queryPath);
+    return result;
   }
 }
 
@@ -95,37 +105,28 @@ export function sticky<T>(
  * @template T
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
- * @param {boolean} [showWarn=false]
  * @returns
  */
 export function bondEvent<T extends AggregationFunc>(
   token: LinkToken,
-  queryPath: QueryPath,
-  showWarn: boolean = false
+  queryPath: QueryPath
 ) {
-  const provideService = inject(token);
-  if (!provideService) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper aggregate event] lose link");
-    }
+  const provideFormula = inject(token);
+  if (!provideFormula) {
     return () => {};
   }
   if (queryPath === undefined || (queryPath as any)?.length <= 0) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper] queryPath was empty");
-    }
     return () => {};
   }
-  const result = get(provideService, queryPath);
+  const result = get(provideFormula, queryPath);
   if (
     result === undefined ||
     Object.prototype.toString.call(result) !== "[object Function]"
   ) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper] event func not found");
-    }
     return () => {};
   }
+  provideFormula.__boundStatus.value.event++;
+  provideFormula.__boundStatus.value.eventList.push(queryPath);
   return result as T;
 }
 
@@ -137,49 +138,39 @@ export function bondEvent<T extends AggregationFunc>(
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
  * @param {T} defaultValue
- * @param {boolean} [showWarn=false]
  * @returns
  */
 export function bondRef<T>(
   token: LinkToken,
   queryPath: QueryPath,
-  defaultValue: T,
-  showWarn: boolean = false
+  defaultValue: T
 ) {
-  if (isRef(defaultValue) || isReactive(defaultValue)) {
-    throw new Error(
-      "[vue-injection-helper aggregate ref] defaultValue cannot be ref or reactive"
-    );
+  if (isProxy(defaultValue)) {
+    throw new Error("[vue-poly ref] defaultValue cannot be proxy");
   }
-  const provideService = inject(token);
+  const provideFormula = inject(token);
   const localRef = ref(defaultValue) as Ref<T>;
-  if (!provideService) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper aggregate ref] lose link");
-    }
+  if (!provideFormula) {
     return localRef;
   }
-  if (queryPath === undefined || (queryPath as any).length <= 0) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper aggregate ref] queryPath was empty");
-    }
+  const firstGet = get(provideFormula, queryPath);
+  if (firstGet === undefined) {
     return localRef;
   }
-  return customRef<T>((track: any, trigger: any) => {
+  provideFormula.__boundStatus.value.ref++;
+  provideFormula.__boundStatus.value.refList.push(queryPath);
+  return customRef<T>((track: any) => {
     return {
       get: () => {
         track();
-        const result = get(provideService, queryPath);
-        if (result === undefined) {
-          console.warn(
-            "[vue-injection-helper aggregate ref] received undefined"
-          );
-          return localRef.value;
-        }
-        return result;
+        return get(provideFormula, queryPath);
       },
       set: (newValue) => {
-        set(provideService, queryPath, newValue);
+        // when frozen, do not set
+        if (provideFormula.__boundStatus.value.frozenSub) {
+          return;
+        }
+        set(provideFormula, queryPath, newValue);
       },
     };
   });

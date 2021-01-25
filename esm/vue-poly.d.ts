@@ -1,12 +1,8 @@
 import { InjectionKey, Ref } from "vue";
 import { PropertyPath } from "lodash";
-export declare type FuncService<T> = (...args: any) => T;
-export declare type ClassService<T> = new (...args: any) => T;
+export declare type FuncFormula<T> = (...args: any) => T;
+export declare type ClassFormula<T> = new (...args: any) => T;
 export declare type AggregationFunc = (...args: any[]) => void;
-export declare type AggregationNode = Ref | AggregationFunc;
-export interface Aggregation {
-    [key: string]: AggregationNode;
-}
 export declare type LinkToken = string | symbol | InjectionKey<any>;
 export declare type QueryPath = PropertyPath;
 export declare const bondGet: {
@@ -38,24 +34,37 @@ export declare const bondSet: {
  *
  * @export
  * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
+ * @param {(FuncFormula<T> | ClassFormula<T>)} formula
  * @returns
  */
-export declare function cataly<T, P>(service: FuncService<T> | ClassService<T>): T;
+export declare function cataly<T, P>(formula: FuncFormula<T> | ClassFormula<T>): T;
 /**
  * define a domain module
  *
  * @export
  * @template T
- * @param {T} context
+ * @param {T} poly
  * @param {LinkToken} token
- * @param {LinkToken} [outerSource]
- * @returns
+ * @param {LinkToken} [outSourceToken]
+ * @return {*}
  */
-export declare function definePoly<T>(context: T, token: LinkToken, outerSource?: LinkToken): {
-    innerContext: T;
-    token: LinkToken;
-};
+export declare function definePoly<T extends {
+    [key: string]: any;
+}>(poly: T, token: LinkToken, outSourceToken?: LinkToken): Ref<{
+    event: number;
+    value: number;
+    ref: number;
+    eventList: (string | number | symbol | (readonly (string | number | symbol)[] & {
+        [Symbol.iterator]: () => IterableIterator<string | number | symbol>;
+    }))[];
+    valueList: (string | number | symbol | (readonly (string | number | symbol)[] & {
+        [Symbol.iterator]: () => IterableIterator<string | number | symbol>;
+    }))[];
+    refList: (string | number | symbol | (readonly (string | number | symbol)[] & {
+        [Symbol.iterator]: () => IterableIterator<string | number | symbol>;
+    }))[];
+    frozenSub: boolean;
+}>;
 /**
  * get sticky vlaue of aggregation root
  *
@@ -74,10 +83,9 @@ export declare function sticky<T>(token: LinkToken, queryPath: QueryPath, defaul
  * @template T
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
- * @param {boolean} [showWarn=false]
  * @returns
  */
-export declare function bondEvent<T extends AggregationFunc>(token: LinkToken, queryPath: QueryPath, showWarn?: boolean): T | (() => void);
+export declare function bondEvent<T extends AggregationFunc>(token: LinkToken, queryPath: QueryPath): T | (() => void);
 /**
  * get aggregated domain ref state
  *
@@ -86,10 +94,9 @@ export declare function bondEvent<T extends AggregationFunc>(token: LinkToken, q
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
  * @param {T} defaultValue
- * @param {boolean} [showWarn=false]
  * @returns
  */
-export declare function bondRef<T>(token: LinkToken, queryPath: QueryPath, defaultValue: T, showWarn?: boolean): Ref<T>;
+export declare function bondRef<T>(token: LinkToken, queryPath: QueryPath, defaultValue: T): Ref<T>;
 declare const _default: {
     cataly: typeof cataly;
     sticky: typeof sticky;
