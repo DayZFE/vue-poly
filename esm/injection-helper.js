@@ -62,37 +62,21 @@ export function defineModule(context, token, outerSource) {
     return { innerContext, token };
 }
 /**
- * get static vlaue of injection
+ *  get static vlaue of injection
  *
  * @export
- * @template T
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
- * @param {boolean} [showWarn=false]
  * @returns
  */
-export function aggregateValue(token, queryPath, showWarn = false) {
+export function aggregateValue(token, queryPath) {
     const provideService = inject(token);
     if (!provideService) {
-        if (showWarn) {
-            console.warn("[vue-injection-helper aggregate value] lose link");
-        }
-        return null;
+        return undefined;
     }
-    if (queryPath === undefined || queryPath?.length <= 0) {
-        if (showWarn) {
-            console.warn("[vue-injection-helper aggregate value] queryPath was empty");
-        }
-        return null;
+    else {
+        return get(provideService, queryPath);
     }
-    const result = get(provideService, queryPath);
-    if (result === undefined) {
-        if (showWarn) {
-            console.warn("[vue-injection-helper] value not found");
-        }
-        return null;
-    }
-    return result;
 }
 /**
  * get aggregated domain event

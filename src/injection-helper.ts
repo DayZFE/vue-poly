@@ -93,43 +93,20 @@ export function defineModule<T>(
 }
 
 /**
- * get static vlaue of injection
+ *  get static vlaue of injection
  *
  * @export
- * @template T
  * @param {LinkToken} token
  * @param {QueryPath} queryPath
- * @param {boolean} [showWarn=false]
  * @returns
  */
-export function aggregateValue<T>(
-  token: LinkToken,
-  queryPath: QueryPath,
-  showWarn: boolean = false
-) {
+export function aggregateValue(token: LinkToken, queryPath: QueryPath) {
   const provideService = inject(token);
   if (!provideService) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper aggregate value] lose link");
-    }
-    return null;
+    return undefined;
+  } else {
+    return get(provideService, queryPath);
   }
-  if (queryPath === undefined || (queryPath as any)?.length <= 0) {
-    if (showWarn) {
-      console.warn(
-        "[vue-injection-helper aggregate value] queryPath was empty"
-      );
-    }
-    return null;
-  }
-  const result = get(provideService, queryPath);
-  if (result === undefined) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper] value not found");
-    }
-    return null;
-  }
-  return result as T;
 }
 
 /**
