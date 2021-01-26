@@ -38,8 +38,8 @@ export declare function definePoly<T extends {
     id: PolyID;
     through?: boolean;
     [key: string]: any;
-}>(poly: T): any;
-export declare function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T): any;
+}>(poly: T): T;
+export declare function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T): T;
 export declare function watchPoly(poly: {
     id: PolyID;
     through?: boolean;
