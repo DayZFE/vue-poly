@@ -7,17 +7,12 @@
     "declarationDir": "esm",
     "strict": true,
     "jsx": "preserve",
-    "sourceMap": true,
+    "sourceMap": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "lib": [
       "esnext",
       "dom"
-    ],
-    "plugins": [
-      {
-        "name": "@vuedx/typescript-plugin-vue"
-      }
     ]
   },
   "include": [

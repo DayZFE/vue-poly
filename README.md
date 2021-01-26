@@ -75,13 +75,13 @@ setup(){
 }
 ```
 
-## poly disabled
+## poly through
 
 ```Typescript
 setup(){
      const poly = definePoly({
         id: "some id",
-        disabled: true,
+        through: true,
         name:ref(''),
         password:ref('')
     })
@@ -95,14 +95,14 @@ setup(){
 
 same as lodash.get & lodash.set
 
-## poly status
+## watch poly status
 
 ```Typescript
 setup(){
   const poly = definePoly({
     name: ref('')
   })
-  watch(poly.polyStatus, res=>{
+  watchPoly(poly, res=>{
       console.log(res.bondList)
       // [{queryPath:['name','value'],type:"ref"}]
   })

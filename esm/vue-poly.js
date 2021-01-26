@@ -1,4 +1,4 @@
-import { provide, inject, customRef, ref } from "vue";
+import { provide, inject, customRef, ref, watch, toRaw, } from "vue";
 import { get, set } from "lodash";
 export const bondGet = get;
 export const bondSet = set;
@@ -7,7 +7,7 @@ export function cataly(Poly) {
     return undefined;
 }
 export function definePoly(poly) {
-    if (poly.disabled) {
+    if (poly.through) {
         const injectedPoly = inject(poly.id);
         if (injectedPoly === undefined) {
             throw new Error("cannot disable a poly while no other poly founded");
@@ -31,7 +31,7 @@ export function bond(id, queryPath, defaultValue) {
     if (!poly)
         return defaultValue;
     const IDResult = get(poly, queryPath);
-    if (!IDResult)
+    if (IDResult === undefined)
         return defaultValue;
     if (typeof IDResult === "function") {
         type = "event";
@@ -41,7 +41,7 @@ export function bond(id, queryPath, defaultValue) {
         return customRef((track) => ({
             get() {
                 track();
-                return IDResult;
+                return get(poly, queryPath);
             },
             set(val) {
                 if (poly.polyStatus.value.frozen)
@@ -52,11 +52,19 @@ export function bond(id, queryPath, defaultValue) {
     }
     return IDResult;
 }
+export function watchPoly(poly, cb) {
+    const polyStatus = poly.polyStatus;
+    watch(polyStatus, (res) => {
+        setTimeout(() => {
+            cb(toRaw(res));
+        }, 0);
+    }, { immediate: true });
+}
 export default {
     cataly,
     bond,
     bondGet,
     bondSet,
     definePoly,
+    watchPoly,
 };
-//# sourceMappingURL=vue-poly.js.map

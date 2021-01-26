@@ -1,4 +1,12 @@
-import { InjectionKey, provide, inject, customRef, ref } from "vue";
+import {
+  InjectionKey,
+  provide,
+  inject,
+  customRef,
+  ref,
+  watch,
+  toRaw,
+} from "vue";
 import { get, set, PropertyPath } from "lodash";
 
 export type FunctionPoly<T> = (...args: any) => T;
@@ -20,9 +28,9 @@ export function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>) {
 }
 
 export function definePoly<
-  T extends { id: PolyID; disabled?: boolean; [key: string]: any }
+  T extends { id: PolyID; through?: boolean; [key: string]: any }
 >(poly: T) {
-  if (poly.disabled) {
+  if (poly.through) {
     const injectedPoly = inject(poly.id);
     if (injectedPoly === undefined) {
       throw new Error("cannot disable a poly while no other poly founded");
@@ -46,7 +54,7 @@ export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
   const poly = inject(id);
   if (!poly) return defaultValue;
   const IDResult = get(poly, queryPath);
-  if (!IDResult) return defaultValue;
+  if (IDResult === undefined) return defaultValue;
   if (typeof IDResult === "function") {
     type = "event";
   }
@@ -55,7 +63,7 @@ export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
     return customRef((track) => ({
       get() {
         track();
-        return IDResult;
+        return get(poly, queryPath);
       },
       set(val: any) {
         if (poly.polyStatus.value.frozen) return;
@@ -66,10 +74,31 @@ export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
   return IDResult;
 }
 
+export function watchPoly(
+  poly: {
+    id: PolyID;
+    through?: boolean;
+    [key: string]: any;
+  },
+  cb: (status: { bondList: Bondation[]; frozen: boolean }) => void
+) {
+  const polyStatus = (poly as any).polyStatus;
+  watch(
+    polyStatus as any,
+    (res) => {
+      setTimeout(() => {
+        cb(toRaw(res as any));
+      }, 0);
+    },
+    { immediate: true }
+  );
+}
+
 export default {
   cataly,
   bond,
   bondGet,
   bondSet,
   definePoly,
+  watchPoly,
 };

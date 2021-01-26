@@ -36,10 +36,18 @@ export declare const bondSet: {
 export declare function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>): T;
 export declare function definePoly<T extends {
     id: PolyID;
-    disabled?: boolean;
+    through?: boolean;
     [key: string]: any;
 }>(poly: T): any;
 export declare function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T): any;
+export declare function watchPoly(poly: {
+    id: PolyID;
+    through?: boolean;
+    [key: string]: any;
+}, cb: (status: {
+    bondList: Bondation[];
+    frozen: boolean;
+}) => void): void;
 declare const _default: {
     cataly: typeof cataly;
     bond: typeof bond;
@@ -68,5 +76,6 @@ declare const _default: {
         <TResult>(object: object, path: import("lodash").Many<string | number | symbol>, value: any): TResult;
     };
     definePoly: typeof definePoly;
+    watchPoly: typeof watchPoly;
 };
 export default _default;
