@@ -1,151 +1,70 @@
-import { provide, inject, customRef, ref, isProxy, } from "vue";
+import { provide, inject, customRef, ref, watch, toRaw, } from "vue";
 import { get, set } from "lodash";
 export const bondGet = get;
 export const bondSet = set;
 // @ts-ignore
-/**
- * get mock instance
- *
- * @export
- * @template T
- * @param {(FuncFormula<T> | ClassFormula<T>)} formula
- * @returns
- */
-export function cataly(formula) {
+export function cataly(Poly) {
     return undefined;
 }
-/**
- * define a domain module
- *
- * @export
- * @template T
- * @param {T} poly
- * @param {LinkToken} token
- * @param {LinkToken} [outSourceToken]
- * @return {*}
- */
-export function definePoly(poly, token, outSourceToken) {
-    let polyValue = poly;
-    if (outSourceToken) {
-        const result = inject(outSourceToken);
-        if (result === undefined) {
-            console.warn("[vue-poly]lose bound to outerSource");
+export function definePoly(poly) {
+    if (poly.through) {
+        const injectedPoly = inject(poly.id);
+        if (injectedPoly === undefined) {
+            throw new Error("cannot disable a poly while no other poly founded");
         }
-        else {
-            polyValue = result;
-        }
+        return injectedPoly;
     }
-    const __boundStatus = ref({
-        event: 0,
-        value: 0,
-        ref: 0,
-        eventList: [],
-        valueList: [],
-        refList: [],
-        frozenSub: false,
+    const polyStatus = ref({
+        bondList: [],
+        frozen: false,
     });
-    provide(token, { ...polyValue, __boundStatus });
-    return __boundStatus;
+    const usedPoly = { ...poly, polyStatus };
+    provide(poly.id, usedPoly);
+    return usedPoly;
 }
-/**
- * get sticky vlaue of aggregation root
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @returns
- */
-export function sticky(token, queryPath, defaultValue) {
-    const provideFormula = inject(token);
-    if (!provideFormula) {
+export function bond(id, queryPath, defaultValue) {
+    let type = "static";
+    if (typeof queryPath !== "string" && queryPath.includes("value")) {
+        type = "ref";
+    }
+    const poly = inject(id);
+    if (!poly)
         return defaultValue;
+    const IDResult = get(poly, queryPath);
+    if (IDResult === undefined)
+        return defaultValue;
+    if (typeof IDResult === "function") {
+        type = "event";
     }
-    else {
-        const result = get(provideFormula, queryPath);
-        if (result === undefined) {
-            return defaultValue;
-        }
-        provideFormula.__boundStatus.value.value++;
-        provideFormula.__boundStatus.value.valueList.push(queryPath);
-        return result;
-    }
-}
-/**
- * get aggregated domain event
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @returns
- */
-export function bondEvent(token, queryPath) {
-    const provideFormula = inject(token);
-    if (!provideFormula) {
-        return () => { };
-    }
-    if (queryPath === undefined || queryPath?.length <= 0) {
-        return () => { };
-    }
-    const result = get(provideFormula, queryPath);
-    if (result === undefined ||
-        Object.prototype.toString.call(result) !== "[object Function]") {
-        return () => { };
-    }
-    provideFormula.__boundStatus.value.event++;
-    provideFormula.__boundStatus.value.eventList.push(queryPath);
-    return result;
-}
-/**
- * get aggregated domain ref state
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @returns
- */
-export function bondRef(token, queryPath, defaultValue) {
-    if (isProxy(defaultValue)) {
-        throw new Error("[vue-poly ref] defaultValue cannot be proxy");
-    }
-    const provideFormula = inject(token);
-    const localRef = ref(defaultValue);
-    if (!provideFormula) {
-        return localRef;
-    }
-    const firstGet = get(provideFormula, queryPath);
-    if (firstGet === undefined) {
-        return localRef;
-    }
-    provideFormula.__boundStatus.value.ref++;
-    provideFormula.__boundStatus.value.refList.push(queryPath);
-    return customRef((track) => {
-        return {
-            get: () => {
+    poly.polyStatus.value.bondList.push({ type, queryPath });
+    if (type === "ref") {
+        return customRef((track) => ({
+            get() {
                 track();
-                return get(provideFormula, queryPath);
+                return get(poly, queryPath);
             },
-            set: (newValue) => {
-                // when frozen, do not set
-                if (provideFormula.__boundStatus.value.frozenSub) {
+            set(val) {
+                if (poly.polyStatus.value.frozen)
                     return;
-                }
-                set(provideFormula, queryPath, newValue);
+                set(poly, queryPath, val);
             },
-        };
-    });
+        }));
+    }
+    return IDResult;
+}
+export function watchPoly(poly, cb) {
+    const polyStatus = poly.polyStatus;
+    watch(polyStatus, (res) => {
+        setTimeout(() => {
+            cb(toRaw(res));
+        }, 0);
+    }, { immediate: true });
 }
 export default {
     cataly,
-    sticky,
+    bond,
     bondGet,
     bondSet,
-    bondRef,
-    bondEvent,
     definePoly,
+    watchPoly,
 };
-//# sourceMappingURL=vue-poly.js.map
