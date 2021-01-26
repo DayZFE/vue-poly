@@ -34,7 +34,7 @@ export function definePoly<
     frozen: false,
   });
   const usedPoly = { ...poly, polyStatus };
-  provide(poly.ID, usedPoly);
+  provide(poly.id, usedPoly);
   return usedPoly;
 }
 

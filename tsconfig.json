@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "UMD",
     "moduleResolution": "node",
     "declaration": true,
     "declarationDir": "esm",
