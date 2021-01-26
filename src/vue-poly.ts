@@ -1,196 +1,75 @@
-import {
-  InjectionKey,
-  provide,
-  inject,
-  customRef,
-  Ref,
-  ref,
-  isRef,
-  isReactive,
-} from "vue";
+import { InjectionKey, provide, inject, customRef, ref } from "vue";
 import { get, set, PropertyPath } from "lodash";
 
-export type FuncService<T> = (...args: any) => T;
-export type ClassService<T> = new (...args: any) => T;
-export type AggregationFunc = (...args: any[]) => void;
-export type AggregationNode = Ref | AggregationFunc;
-export interface Aggregation {
-  [key: string]: AggregationNode;
-}
-export type LinkToken = string | symbol | InjectionKey<any>;
+export type FunctionPoly<T> = (...args: any) => T;
+export type ClassPoly<T> = new (...args: any) => T;
+export type PolyEvent = (...args: any) => void;
+export type PolyID = string | symbol | InjectionKey<any>;
 export type QueryPath = PropertyPath;
+export interface Bondation {
+  type: "ref" | "event" | "static";
+  queryPath: QueryPath;
+}
 
 export const bondGet = get;
 export const bondSet = set;
 
 // @ts-ignore
-/**
- * get mock instance
- *
- * @export
- * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
- * @returns
- */
-export function cataly<T, P>(service: FuncService<T> | ClassService<T>) {
+export function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>) {
   return (undefined as unknown) as T;
 }
 
-/**
- * define a domain module
- *
- * @export
- * @template T
- * @param {T} context
- * @param {LinkToken} token
- * @param {LinkToken} [outerSource]
- * @returns
- */
-export function definePoly<T>(
-  context: T,
-  token: LinkToken,
-  outerSource?: LinkToken
-) {
-  let innerContext = context;
-  if (outerSource) {
-    const result = inject(outerSource);
-    if (result === undefined) {
-      console.warn("[vue-injection-helper]lose link to outerSource");
-    } else {
-      innerContext = result;
+export function definePoly<
+  T extends { id: PolyID; disabled?: boolean; [key: string]: any }
+>(poly: T) {
+  if (poly.disabled) {
+    const injectedPoly = inject(poly.id);
+    if (injectedPoly === undefined) {
+      throw new Error("cannot disable a poly while no other poly founded");
     }
+    return injectedPoly;
   }
-  provide(token, innerContext);
-  return { innerContext, token };
-}
-
-/**
- * get sticky vlaue of aggregation root
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @returns
- */
-export function sticky<T>(
-  token: LinkToken,
-  queryPath: QueryPath,
-  defaultValue: T
-) {
-  const provideService = inject(token);
-  if (!provideService) {
-    return defaultValue;
-  } else {
-    const result = get(provideService, queryPath) as T;
-    return result === undefined ? result : defaultValue;
-  }
-}
-
-/**
- * get aggregated domain event
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {boolean} [showWarn=false]
- * @returns
- */
-export function bondEvent<T extends AggregationFunc>(
-  token: LinkToken,
-  queryPath: QueryPath,
-  showWarn: boolean = false
-) {
-  const provideService = inject(token);
-  if (!provideService) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper aggregate event] lose link");
-    }
-    return () => {};
-  }
-  if (queryPath === undefined || (queryPath as any)?.length <= 0) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper] queryPath was empty");
-    }
-    return () => {};
-  }
-  const result = get(provideService, queryPath);
-  if (
-    result === undefined ||
-    Object.prototype.toString.call(result) !== "[object Function]"
-  ) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper] event func not found");
-    }
-    return () => {};
-  }
-  return result as T;
-}
-
-/**
- * get aggregated domain ref state
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @param {boolean} [showWarn=false]
- * @returns
- */
-export function bondRef<T>(
-  token: LinkToken,
-  queryPath: QueryPath,
-  defaultValue: T,
-  showWarn: boolean = false
-) {
-  if (isRef(defaultValue) || isReactive(defaultValue)) {
-    throw new Error(
-      "[vue-injection-helper aggregate ref] defaultValue cannot be ref or reactive"
-    );
-  }
-  const provideService = inject(token);
-  const localRef = ref(defaultValue) as Ref<T>;
-  if (!provideService) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper aggregate ref] lose link");
-    }
-    return localRef;
-  }
-  if (queryPath === undefined || (queryPath as any).length <= 0) {
-    if (showWarn) {
-      console.warn("[vue-injection-helper aggregate ref] queryPath was empty");
-    }
-    return localRef;
-  }
-  return customRef<T>((track: any, trigger: any) => {
-    return {
-      get: () => {
-        track();
-        const result = get(provideService, queryPath);
-        if (result === undefined) {
-          console.warn(
-            "[vue-injection-helper aggregate ref] received undefined"
-          );
-          return localRef.value;
-        }
-        return result;
-      },
-      set: (newValue) => {
-        set(provideService, queryPath, newValue);
-      },
-    };
+  const polyStatus = ref({
+    bondList: [] as Bondation[],
+    frozen: false,
   });
+  const usedPoly = { ...poly, polyStatus };
+  provide(poly.ID, usedPoly);
+  return usedPoly;
+}
+
+export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
+  let type = "static";
+  if (typeof queryPath !== "string" && (queryPath as any[]).includes("value")) {
+    type = "ref";
+  }
+  const poly = inject(id);
+  if (!poly) return defaultValue;
+  const IDResult = get(poly, queryPath);
+  if (!IDResult) return defaultValue;
+  if (typeof IDResult === "function") {
+    type = "event";
+  }
+  poly.polyStatus.value.bondList.push({ type, queryPath });
+  if (type === "ref") {
+    return customRef((track) => ({
+      get() {
+        track();
+        return IDResult;
+      },
+      set(val: any) {
+        if (poly.polyStatus.value.frozen) return;
+        set(poly, queryPath, val);
+      },
+    }));
+  }
+  return IDResult;
 }
 
 export default {
   cataly,
-  sticky,
+  bond,
   bondGet,
   bondSet,
-  bondRef,
-  bondEvent,
   definePoly,
 };

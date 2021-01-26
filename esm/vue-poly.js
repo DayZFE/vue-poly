@@ -1,150 +1,62 @@
-import { provide, inject, customRef, ref, isRef, isReactive, } from "vue";
+import { provide, inject, customRef, ref } from "vue";
 import { get, set } from "lodash";
 export const bondGet = get;
 export const bondSet = set;
 // @ts-ignore
-/**
- * get mock instance
- *
- * @export
- * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
- * @returns
- */
-export function cataly(service) {
+export function cataly(Poly) {
     return undefined;
 }
-/**
- * define a domain module
- *
- * @export
- * @template T
- * @param {T} context
- * @param {LinkToken} token
- * @param {LinkToken} [outerSource]
- * @returns
- */
-export function definePoly(context, token, outerSource) {
-    let innerContext = context;
-    if (outerSource) {
-        const result = inject(outerSource);
-        if (result === undefined) {
-            console.warn("[vue-injection-helper]lose link to outerSource");
+export function definePoly(poly) {
+    if (poly.disabled) {
+        const injectedPoly = inject(poly.id);
+        if (injectedPoly === undefined) {
+            throw new Error("cannot disable a poly while no other poly founded");
         }
-        else {
-            innerContext = result;
-        }
+        return injectedPoly;
     }
-    provide(token, innerContext);
-    return { innerContext, token };
-}
-/**
- * get sticky vlaue of aggregation root
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @returns
- */
-export function sticky(token, queryPath, defaultValue) {
-    const provideService = inject(token);
-    if (!provideService) {
-        return defaultValue;
-    }
-    else {
-        const result = get(provideService, queryPath);
-        return result === undefined ? result : defaultValue;
-    }
-}
-/**
- * get aggregated domain event
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {boolean} [showWarn=false]
- * @returns
- */
-export function bondEvent(token, queryPath, showWarn = false) {
-    const provideService = inject(token);
-    if (!provideService) {
-        if (showWarn) {
-            console.warn("[vue-injection-helper aggregate event] lose link");
-        }
-        return () => { };
-    }
-    if (queryPath === undefined || queryPath?.length <= 0) {
-        if (showWarn) {
-            console.warn("[vue-injection-helper] queryPath was empty");
-        }
-        return () => { };
-    }
-    const result = get(provideService, queryPath);
-    if (result === undefined ||
-        Object.prototype.toString.call(result) !== "[object Function]") {
-        if (showWarn) {
-            console.warn("[vue-injection-helper] event func not found");
-        }
-        return () => { };
-    }
-    return result;
-}
-/**
- * get aggregated domain ref state
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @param {boolean} [showWarn=false]
- * @returns
- */
-export function bondRef(token, queryPath, defaultValue, showWarn = false) {
-    if (isRef(defaultValue) || isReactive(defaultValue)) {
-        throw new Error("[vue-injection-helper aggregate ref] defaultValue cannot be ref or reactive");
-    }
-    const provideService = inject(token);
-    const localRef = ref(defaultValue);
-    if (!provideService) {
-        if (showWarn) {
-            console.warn("[vue-injection-helper aggregate ref] lose link");
-        }
-        return localRef;
-    }
-    if (queryPath === undefined || queryPath.length <= 0) {
-        if (showWarn) {
-            console.warn("[vue-injection-helper aggregate ref] queryPath was empty");
-        }
-        return localRef;
-    }
-    return customRef((track, trigger) => {
-        return {
-            get: () => {
-                track();
-                const result = get(provideService, queryPath);
-                if (result === undefined) {
-                    console.warn("[vue-injection-helper aggregate ref] received undefined");
-                    return localRef.value;
-                }
-                return result;
-            },
-            set: (newValue) => {
-                set(provideService, queryPath, newValue);
-            },
-        };
+    const polyStatus = ref({
+        bondList: [],
+        frozen: false,
     });
+    const usedPoly = { ...poly, polyStatus };
+    provide(poly.ID, usedPoly);
+    return usedPoly;
+}
+export function bond(id, queryPath, defaultValue) {
+    let type = "static";
+    if (typeof queryPath !== "string" && queryPath.includes("value")) {
+        type = "ref";
+    }
+    const poly = inject(id);
+    if (!poly)
+        return defaultValue;
+    const IDResult = get(poly, queryPath);
+    if (!IDResult)
+        return defaultValue;
+    if (typeof IDResult === "function") {
+        type = "event";
+    }
+    poly.polyStatus.value.bondList.push({ type, queryPath });
+    if (type === "ref") {
+        return customRef((track) => ({
+            get() {
+                track();
+                return IDResult;
+            },
+            set(val) {
+                if (poly.polyStatus.value.frozen)
+                    return;
+                set(poly, queryPath, val);
+            },
+        }));
+    }
+    return IDResult;
 }
 export default {
     cataly,
-    sticky,
+    bond,
     bondGet,
     bondSet,
-    bondRef,
-    bondEvent,
     definePoly,
 };
 //# sourceMappingURL=vue-poly.js.map

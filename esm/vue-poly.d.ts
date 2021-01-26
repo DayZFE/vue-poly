@@ -1,14 +1,14 @@
-import { InjectionKey, Ref } from "vue";
+import { InjectionKey } from "vue";
 import { PropertyPath } from "lodash";
-export declare type FuncService<T> = (...args: any) => T;
-export declare type ClassService<T> = new (...args: any) => T;
-export declare type AggregationFunc = (...args: any[]) => void;
-export declare type AggregationNode = Ref | AggregationFunc;
-export interface Aggregation {
-    [key: string]: AggregationNode;
-}
-export declare type LinkToken = string | symbol | InjectionKey<any>;
+export declare type FunctionPoly<T> = (...args: any) => T;
+export declare type ClassPoly<T> = new (...args: any) => T;
+export declare type PolyEvent = (...args: any) => void;
+export declare type PolyID = string | symbol | InjectionKey<any>;
 export declare type QueryPath = PropertyPath;
+export interface Bondation {
+    type: "ref" | "event" | "static";
+    queryPath: QueryPath;
+}
 export declare const bondGet: {
     <TObject extends object, TKey extends keyof TObject>(object: TObject, path: TKey | [TKey]): TObject[TKey];
     <TObject_1 extends object, TKey_1 extends keyof TObject_1>(object: TObject_1 | null | undefined, path: TKey_1 | [TKey_1]): TObject_1[TKey_1] | undefined;
@@ -33,66 +33,16 @@ export declare const bondSet: {
     <T extends object>(object: T, path: import("lodash").Many<string | number | symbol>, value: any): T;
     <TResult>(object: object, path: import("lodash").Many<string | number | symbol>, value: any): TResult;
 };
-/**
- * get mock instance
- *
- * @export
- * @template T
- * @param {(FuncService<T> | ClassService<T>)} service
- * @returns
- */
-export declare function cataly<T, P>(service: FuncService<T> | ClassService<T>): T;
-/**
- * define a domain module
- *
- * @export
- * @template T
- * @param {T} context
- * @param {LinkToken} token
- * @param {LinkToken} [outerSource]
- * @returns
- */
-export declare function definePoly<T>(context: T, token: LinkToken, outerSource?: LinkToken): {
-    innerContext: T;
-    token: LinkToken;
-};
-/**
- * get sticky vlaue of aggregation root
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @returns
- */
-export declare function sticky<T>(token: LinkToken, queryPath: QueryPath, defaultValue: T): T;
-/**
- * get aggregated domain event
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {boolean} [showWarn=false]
- * @returns
- */
-export declare function bondEvent<T extends AggregationFunc>(token: LinkToken, queryPath: QueryPath, showWarn?: boolean): T | (() => void);
-/**
- * get aggregated domain ref state
- *
- * @export
- * @template T
- * @param {LinkToken} token
- * @param {QueryPath} queryPath
- * @param {T} defaultValue
- * @param {boolean} [showWarn=false]
- * @returns
- */
-export declare function bondRef<T>(token: LinkToken, queryPath: QueryPath, defaultValue: T, showWarn?: boolean): Ref<T>;
+export declare function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>): T;
+export declare function definePoly<T extends {
+    id: PolyID;
+    disabled?: boolean;
+    [key: string]: any;
+}>(poly: T): any;
+export declare function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T): any;
 declare const _default: {
     cataly: typeof cataly;
-    sticky: typeof sticky;
+    bond: typeof bond;
     bondGet: {
         <TObject extends object, TKey extends keyof TObject>(object: TObject, path: TKey | [TKey]): TObject[TKey];
         <TObject_1 extends object, TKey_1 extends keyof TObject_1>(object: TObject_1 | null | undefined, path: TKey_1 | [TKey_1]): TObject_1[TKey_1] | undefined;
@@ -117,8 +67,6 @@ declare const _default: {
         <T_3 extends object>(object: T_3, path: import("lodash").Many<string | number | symbol>, value: any): T_3;
         <TResult>(object: object, path: import("lodash").Many<string | number | symbol>, value: any): TResult;
     };
-    bondRef: typeof bondRef;
-    bondEvent: typeof bondEvent;
     definePoly: typeof definePoly;
 };
 export default _default;

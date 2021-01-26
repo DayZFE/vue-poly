@@ -8,167 +8,131 @@
 
 ```Typescript
 setup(outerToken: string){
-    const token = "inner-token"
-    const poly = {
+    const poly = definePoly({
+        id: "some id",
         name:ref(''),
         password:ref(''),
         someEvent:()=>{
             console.log(`let's do Chemistry!!!`)
         },
-        stickValue: "this is sticky, aka static value"
-    }
-    definePoly(poly,token,outerToken)
+        staticValue: "this is sticky, aka static value"
+    })
+    return poly
 ```
 
 Define a poly —— bunch of ref , event, sticky value that can be used by other composition
 
 We sincerely recommend to use string instead of Symbol —— with poly you don't have to handle collision problem
 
-When outerToken provided and defined, Poly will link to the outer one
+So the id will be the InjectionToken
 
-## sticky
+## bond
 
 ```Typescript
 setup(){
-    const stickValue = sticky('poly-token','stickyValue','default value')
-    const stickValue = sticky('poly-token',['stickyValue'],'default value')
+    // just part of a poly
+    // get by the poly id
+    // use default value if poly not existed
+    const polyPartial = {
+      name:bond('some id',['name','value'],ref('')),
+      password:bond('some id',['password','value'],ref('')),
+      someEvent:bond('some id','someEvent',()=>{}),
+      staticValue: bond('some id','staticValue','')
+    }
+    // change ref will take effect on poly
+    polyPartial.name.value = "new name"
+    // in upper example, poly.name.value will be "new name"
+
+    // you can create a new poly by it
+    const newPoly = definePoly({id:"new id",...polyPartial})
 }
 ```
 
-We will get the sticky value of poly, if defaultValue provided and poly sticky not founded, return the defaultValue instead
+Get part of poly data
 
-## boundRef
+When poly not found, or cannot get value from suck path, use default value instead
+
+## poly frozen
 
 ```Typescript
 setup(){
-    const name = boundRef('poly-token',['name','value'],'default value')
-    watch(()=>{
-        if(name.value===''){
-            name.value = 'default value'
-        }
+    const poly = definePoly({
+        id: "some id",
+        name:ref(''),
+        password:ref('')
     })
+    poly.polyStatus.forzen = true
+}
+// now you cannot set value of ref in other poly partial
+setup(){
+    const polyPartial = {
+      name:bond('some id',['name','value'],ref('')),
+      password:bond('some id',['password','value'],ref(''))
+    }
+    // this setting will not take effect
+    polyPartial.name.value = "new name"
+    polyPartial.password.value = "new password"
 }
 ```
 
-Get part of poly, no matter how deep the key path, or if it is a ref, it'll all return a ref for you to handle with watch & watchEffect & computed
-
-## boundEvent
+## poly disabled
 
 ```Typescript
 setup(){
-    const someEvent = boundEvent('poly-token','someEvent')
-    someEvent()
+     const poly = definePoly({
+        id: "some id",
+        disabled: true,
+        name:ref(''),
+        password:ref('')
+    })
+    // other poly config will not be used
+    // use poly defined in parent component
+    // with same id
 }
 ```
-
-Get part of poly's event function, you don't have to provide a default value, we'll use ()=>{} when poly losted
 
 ## boundGet,boundSet
 
 same as lodash.get & lodash.set
 
-## example
+## poly status
 
 ```Typescript
-// composition functions
-
-function FormComtrol(token: string){
-  const touched = ref<boolean>(false);
-  const focusedKeyList = ref<string[]>([]);
-  const valid = ref<boolean>(false);
-  const disabled = ref<boolean>(false);
-  const errorList = ref<FieldErrorList>({});
-  const validator = computed(() => new Schema(rules ? rules.value : {}));
-  const touch = () => {
-    touched.value = true;
-  };
-  const validate = () => {
-    return new Promise((res) => {
-      validator.value.validate(model.value, {}, (errors, fileds) => {
-        if (errors) {
-          errorList.value = fileds;
-          valid.value = false;
-        } else {
-          valid.value = true;
-          (res as any)();
-        }
-      });
-    });
-  };
-  const focused = computed(() => focusedKeyList.value.length > 0);
-  const poly = {
-    model,
-    rules,
-    touched,
-    focused,
-    focusedKeyList,
-    valid,
-    disabled,
-    errorList,
-    validator,
-    touch,
-    validate,
-  };
-  definePoly(poly, "form-token", token);
-  return poly;
+setup(){
+  const poly = definePoly({
+    name: ref('')
+  })
+  watch(poly.polyStatus, res=>{
+      console.log(res.bondList)
+      // [{queryPath:['name','value'],type:"ref"}]
+  })
 }
-
-function InputControl(defaultValue?: any, token?: string) {
-  const usedToken = token || "form-control";
-  const keyList = sticky("form-item-control", "keyList",[])
-  const newPoly = {
-    model: boundRef(
-      usedToken,
-      ["model", "value", ...keyList],
-      undefined as any
-    ),
-    errors: boundRef(usedToken, ["errorList", "value", ...keyList], []),
-    disabled: boundRef(usedToken, ["disabled", "value"], false),
-    touched: boundRef(usedToken, ["touched", "value"], false),
-    touch: boundEvent(usedToken, ["touch"]),
-    focusedKeyList: boundRef(
-      usedToken,
-      ["focusedKeyList", "value"],
-      [] as string[]
-    ),
-  };
-  // default value is superior than all
-  if (defaultValue !== undefined) {
-    newPoly.model.value = defaultValue;
-  }
-  // independent focused
-  const focused = ref(false);
-  // focus when touch and set focusedKey
-  const focus = () => {
-    focused.value = true;
-    newPoly.touch();
-    const value = keyList.join("-");
-    const exist = newPoly.focusedKeyList.value.find((el) => el === value);
-    if (!exist) newPoly.focusedKeyList.value.push(value);
-  };
-
-  const blur = () => {
-    focused.value = false;
-    newPoly.focusedKeyList.value = newPoly.focusedKeyList.value.filter(
-      (el) => el !== keyList.join("-")
-    );
-  };
-  // link a new poly?
-  // definePoly(newPoly, 'input-control')
-  return { ...newPoly, focused, focus, blur };
-}
-
 ```
 
-You can program with out any component
+You can get the bonding feedback of polyPartial in child components
 
-Also do not forget to use it with unit-testing
+## poly composer
+
+```Typescript
+function some(){
+  const poly = definePoly({
+    name: ref('')
+  })
+  return poly
+}
+const cata = cataly(some)
+function polyComposer(poly: typeof cata){
+    // handle poly
+}
+
+polyComposer(some())
+```
 
 ## Domain-Driven-Design
 
 If you know DDD
 
-You'll get that poly is aggregation, sticky is value object, ref is actor, event is domain event
+You'll get that poly is aggregation, static is value object, ref is actor, event is domain event
 
 DDD is far more better than state management, remember that~
 
