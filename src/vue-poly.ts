@@ -71,9 +71,7 @@ export function definePoly<
   });
   // provide logicId and id
   provide(poly.id, usedPoly);
-  if (poly.logicId) {
-    provide(poly.logicId, usedPoly);
-  }
+  provide(usedPoly.logicId, usedPoly);
   return usedPoly;
 }
 
