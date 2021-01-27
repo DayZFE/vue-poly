@@ -9,6 +9,13 @@ export interface Bondation {
     type: "ref" | "event" | "static";
     queryPath: QueryPath;
 }
+export interface Poly {
+    id: PolyID;
+    innerId?: PolyID;
+    through?: boolean;
+    frozen?: boolean;
+    [key: string]: any;
+}
 export declare const bondGet: {
     <TObject extends object, TKey extends keyof TObject>(object: TObject, path: TKey | [TKey]): TObject[TKey];
     <TObject_1 extends object, TKey_1 extends keyof TObject_1>(object: TObject_1 | null | undefined, path: TKey_1 | [TKey_1]): TObject_1[TKey_1] | undefined;
@@ -34,17 +41,9 @@ export declare const bondSet: {
     <TResult>(object: object, path: import("lodash").Many<string | number | symbol>, value: any): TResult;
 };
 export declare function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>): T;
-export declare function definePoly<T extends {
-    id: PolyID;
-    through?: boolean;
-    [key: string]: any;
-}>(poly: T): any;
+export declare function definePoly<T extends Poly>(poly: T): any;
 export declare function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T): any;
-export declare function watchPoly(poly: {
-    id: PolyID;
-    through?: boolean;
-    [key: string]: any;
-}, cb: (status: {
+export declare function watchPoly(poly: Poly, cb: (status: {
     bondList: Bondation[];
     frozen: boolean;
 }) => void): void;

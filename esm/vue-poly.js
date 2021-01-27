@@ -16,10 +16,13 @@ export function definePoly(poly) {
     }
     const polyStatus = ref({
         bondList: [],
-        frozen: false,
+        frozen: poly.frozen || false,
     });
     const usedPoly = { ...poly, polyStatus };
     provide(poly.id, usedPoly);
+    if (poly.innerId) {
+        provide(poly.innerId, usedPoly);
+    }
     return usedPoly;
 }
 export function bond(id, queryPath, defaultValue) {

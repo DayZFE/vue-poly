@@ -18,6 +18,13 @@ export interface Bondation {
   type: "ref" | "event" | "static";
   queryPath: QueryPath;
 }
+export interface Poly {
+  id: PolyID;
+  innerId?: PolyID;
+  through?: boolean;
+  frozen?: boolean;
+  [key: string]: any;
+}
 
 export const bondGet = get;
 export const bondSet = set;
@@ -27,9 +34,7 @@ export function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>) {
   return (undefined as unknown) as T;
 }
 
-export function definePoly<
-  T extends { id: PolyID; through?: boolean; [key: string]: any }
->(poly: T) {
+export function definePoly<T extends Poly>(poly: T) {
   if (poly.through) {
     const injectedPoly = inject(poly.id);
     if (injectedPoly === undefined) {
@@ -39,10 +44,13 @@ export function definePoly<
   }
   const polyStatus = ref({
     bondList: [] as Bondation[],
-    frozen: false,
+    frozen: poly.frozen || false,
   });
   const usedPoly = { ...poly, polyStatus };
   provide(poly.id, usedPoly);
+  if (poly.innerId) {
+    provide(poly.innerId, usedPoly);
+  }
   return usedPoly;
 }
 
@@ -75,11 +83,7 @@ export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
 }
 
 export function watchPoly(
-  poly: {
-    id: PolyID;
-    through?: boolean;
-    [key: string]: any;
-  },
+  poly: Poly,
   cb: (status: { bondList: Bondation[]; frozen: boolean }) => void
 ) {
   const polyStatus = (poly as any).polyStatus;
