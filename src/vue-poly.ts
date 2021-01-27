@@ -39,13 +39,23 @@ export function definePoly<T extends Poly>(poly: T) {
     const injectedPoly = inject(poly.id);
     if (injectedPoly !== undefined) {
       return injectedPoly as T;
+    } else {
+      provide(poly.id, injectedPoly);
+      provide(
+        poly.innerId || injectedPoly.innerId || "unkownPoly",
+        injectedPoly
+      );
     }
   }
   const polyStatus = ref({
     bondList: [] as Bondation[],
     frozen: poly.frozen || false,
   });
-  const usedPoly = Object.seal({ ...poly, polyStatus });
+  const usedPoly = Object.seal({
+    ...poly,
+    polyStatus,
+    innerId: poly.innerId || "unkownPoly",
+  });
   provide(poly.id, usedPoly);
   if (poly.innerId) {
     provide(poly.innerId, usedPoly);

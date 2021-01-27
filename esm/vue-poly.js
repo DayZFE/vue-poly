@@ -12,12 +12,20 @@ export function definePoly(poly) {
         if (injectedPoly !== undefined) {
             return injectedPoly;
         }
+        else {
+            provide(poly.id, injectedPoly);
+            provide(poly.innerId || injectedPoly.innerId || "unkownPoly", injectedPoly);
+        }
     }
     const polyStatus = ref({
         bondList: [],
         frozen: poly.frozen || false,
     });
-    const usedPoly = Object.seal({ ...poly, polyStatus });
+    const usedPoly = Object.seal({
+        ...poly,
+        polyStatus,
+        innerId: poly.innerId || "unkownPoly",
+    });
     provide(poly.id, usedPoly);
     if (poly.innerId) {
         provide(poly.innerId, usedPoly);
