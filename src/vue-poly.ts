@@ -37,16 +37,15 @@ export function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>) {
 export function definePoly<T extends Poly>(poly: T) {
   if (poly.through) {
     const injectedPoly = inject(poly.id);
-    if (injectedPoly === undefined) {
-      throw new Error("cannot disable a poly while no other poly founded");
+    if (injectedPoly !== undefined) {
+      return injectedPoly as T;
     }
-    return injectedPoly;
   }
   const polyStatus = ref({
     bondList: [] as Bondation[],
     frozen: poly.frozen || false,
   });
-  const usedPoly = { ...poly, polyStatus };
+  const usedPoly = Object.seal({ ...poly, polyStatus });
   provide(poly.id, usedPoly);
   if (poly.innerId) {
     provide(poly.innerId, usedPoly);
@@ -68,7 +67,7 @@ export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
   }
   poly.polyStatus.value.bondList.push({ type, queryPath });
   if (type === "ref") {
-    return customRef((track) => ({
+    return (customRef((track) => ({
       get() {
         track();
         return get(poly, queryPath);
@@ -77,9 +76,9 @@ export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
         if (poly.polyStatus.value.frozen) return;
         set(poly, queryPath, val);
       },
-    }));
+    })) as unknown) as T;
   }
-  return IDResult;
+  return IDResult as T;
 }
 
 export function watchPoly(

@@ -9,16 +9,15 @@ export function cataly(Poly) {
 export function definePoly(poly) {
     if (poly.through) {
         const injectedPoly = inject(poly.id);
-        if (injectedPoly === undefined) {
-            throw new Error("cannot disable a poly while no other poly founded");
+        if (injectedPoly !== undefined) {
+            return injectedPoly;
         }
-        return injectedPoly;
     }
     const polyStatus = ref({
         bondList: [],
         frozen: poly.frozen || false,
     });
-    const usedPoly = { ...poly, polyStatus };
+    const usedPoly = Object.seal({ ...poly, polyStatus });
     provide(poly.id, usedPoly);
     if (poly.innerId) {
         provide(poly.innerId, usedPoly);
@@ -71,3 +70,4 @@ export default {
     definePoly,
     watchPoly,
 };
+//# sourceMappingURL=vue-poly.js.map
