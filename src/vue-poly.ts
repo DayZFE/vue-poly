@@ -18,9 +18,10 @@ export interface Bondation {
   type: "ref" | "event" | "static";
   queryPath: QueryPath;
 }
+
 export interface Poly {
   id: PolyID;
-  innerId?: PolyID;
+  logicId?: PolyID;
   through?: boolean;
   frozen?: boolean;
   [key: string]: any;
@@ -34,33 +35,54 @@ export function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>) {
   return (undefined as unknown) as T;
 }
 
-export function definePoly<T extends Poly>(poly: T) {
-  if (poly.through) {
+export function definePoly<
+  T extends {
+    id?: PolyID;
+    logicId?: PolyID;
+    through?: boolean;
+    frozen?: boolean;
+    [key: string]: any;
+  }
+>(poly: T) {
+  // provide poly through
+  if (poly.through && poly.id) {
     const injectedPoly = inject(poly.id);
     if (injectedPoly !== undefined) {
       return injectedPoly as T;
     } else {
       provide(poly.id, injectedPoly);
-      provide(
-        poly.innerId || injectedPoly.innerId || "unkownPoly",
-        injectedPoly
-      );
+      provide(poly.logicId || "unknown logic", injectedPoly);
     }
   }
+  // add poly status
   const polyStatus = ref({
     bondList: [] as Bondation[],
     frozen: poly.frozen || false,
   });
+  // automaticlly give a id
+  if (!poly.id) {
+    poly.id = Symbol();
+  }
+  // seal object to avoid modification
   const usedPoly = Object.seal({
     ...poly,
     polyStatus,
-    innerId: poly.innerId || "unkownPoly",
+    logicId: poly.logicId || "unkownLogic",
   });
+  // provide logicId and id
   provide(poly.id, usedPoly);
-  if (poly.innerId) {
-    provide(poly.innerId, usedPoly);
+  if (poly.logicId) {
+    provide(poly.logicId, usedPoly);
   }
   return usedPoly;
+}
+
+export function isPoly(poly: any) {
+  if (poly.polyStatus && poly.id && poly.logicId) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
@@ -95,6 +117,7 @@ export function watchPoly(
   poly: Poly,
   cb: (status: { bondList: Bondation[]; frozen: boolean }) => void
 ) {
+  if (!isPoly(poly)) return;
   const polyStatus = (poly as any).polyStatus;
   watch(
     polyStatus as any,
@@ -114,4 +137,5 @@ export default {
   bondSet,
   definePoly,
   watchPoly,
+  isPoly,
 };

@@ -11,7 +11,7 @@ export interface Bondation {
 }
 export interface Poly {
     id: PolyID;
-    innerId?: PolyID;
+    logicId?: PolyID;
     through?: boolean;
     frozen?: boolean;
     [key: string]: any;
@@ -41,7 +41,14 @@ export declare const bondSet: {
     <TResult>(object: object, path: import("lodash").Many<string | number | symbol>, value: any): TResult;
 };
 export declare function cataly<T, P>(Poly: FunctionPoly<T> | ClassPoly<T>): T;
-export declare function definePoly<T extends Poly>(poly: T): T;
+export declare function definePoly<T extends {
+    id?: PolyID;
+    logicId?: PolyID;
+    through?: boolean;
+    frozen?: boolean;
+    [key: string]: any;
+}>(poly: T): T;
+export declare function isPoly(poly: any): boolean;
 export declare function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T): T;
 export declare function watchPoly(poly: Poly, cb: (status: {
     bondList: Bondation[];
@@ -76,5 +83,6 @@ declare const _default: {
     };
     definePoly: typeof definePoly;
     watchPoly: typeof watchPoly;
+    isPoly: typeof isPoly;
 };
 export default _default;

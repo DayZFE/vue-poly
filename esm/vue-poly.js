@@ -7,30 +7,46 @@ export function cataly(Poly) {
     return undefined;
 }
 export function definePoly(poly) {
-    if (poly.through) {
+    // provide poly through
+    if (poly.through && poly.id) {
         const injectedPoly = inject(poly.id);
         if (injectedPoly !== undefined) {
             return injectedPoly;
         }
         else {
             provide(poly.id, injectedPoly);
-            provide(poly.innerId || injectedPoly.innerId || "unkownPoly", injectedPoly);
+            provide(poly.logicId || "unknown logic", injectedPoly);
         }
     }
+    // add poly status
     const polyStatus = ref({
         bondList: [],
         frozen: poly.frozen || false,
     });
+    // automaticlly give a id
+    if (!poly.id) {
+        poly.id = Symbol();
+    }
+    // seal object to avoid modification
     const usedPoly = Object.seal({
         ...poly,
         polyStatus,
-        innerId: poly.innerId || "unkownPoly",
+        logicId: poly.logicId || "unkownLogic",
     });
+    // provide logicId and id
     provide(poly.id, usedPoly);
-    if (poly.innerId) {
-        provide(poly.innerId, usedPoly);
+    if (poly.logicId) {
+        provide(poly.logicId, usedPoly);
     }
     return usedPoly;
+}
+export function isPoly(poly) {
+    if (poly.polyStatus && poly.id && poly.logicId) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 export function bond(id, queryPath, defaultValue) {
     let type = "static";
@@ -63,6 +79,8 @@ export function bond(id, queryPath, defaultValue) {
     return IDResult;
 }
 export function watchPoly(poly, cb) {
+    if (!isPoly(poly))
+        return;
     const polyStatus = poly.polyStatus;
     watch(polyStatus, (res) => {
         setTimeout(() => {
@@ -77,5 +95,6 @@ export default {
     bondSet,
     definePoly,
     watchPoly,
+    isPoly,
 };
 //# sourceMappingURL=vue-poly.js.map

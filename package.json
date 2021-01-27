@@ -1,6 +1,6 @@
 {
   "name": "vue-poly",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "author": "plightfield",
   "description": "👨‍🔬👩‍🔬Help deal with the problem of provide/inject and logic reuse in vue3+",
   "license": "MIT",
