@@ -51,7 +51,7 @@ export function definePoly<
       return injectedPoly as T;
     } else {
       provide(poly.id, injectedPoly);
-      provide(poly.logicId || "unknownLogic", injectedPoly);
+      provide(poly.logicId || "unknown logic", injectedPoly);
     }
   }
   // add poly status
