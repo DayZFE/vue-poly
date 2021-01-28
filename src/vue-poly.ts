@@ -51,7 +51,7 @@ export function definePoly<
       return injectedPoly as T;
     } else {
       provide(poly.id, injectedPoly);
-      provide(poly.logicId || "unknown logic", injectedPoly);
+      provide(poly.logicId || "unknownLogic", injectedPoly);
     }
   }
   // add poly status
@@ -59,7 +59,7 @@ export function definePoly<
     bondList: [] as Bondation[],
     frozen: poly.frozen || false,
   });
-  // automaticlly give a id
+  // automatically give a id
   if (!poly.id) {
     poly.id = Symbol();
   }
@@ -67,7 +67,7 @@ export function definePoly<
   const usedPoly = Object.seal({
     ...poly,
     polyStatus,
-    logicId: poly.logicId || "unkownLogic",
+    logicId: poly.logicId || "unknownLogic",
   });
   // provide logicId and id
   provide(poly.id, usedPoly);
@@ -97,7 +97,7 @@ export function bond<T>(id: PolyID, queryPath: QueryPath, defaultValue: T) {
   }
   poly.polyStatus.value.bondList.push({ type, queryPath });
   if (type === "ref") {
-    return (customRef((track) => ({
+    return (customRef((track: () => void) => ({
       get() {
         track();
         return get(poly, queryPath);
@@ -119,9 +119,9 @@ export function watchPoly(
   const polyStatus = (poly as any).polyStatus;
   watch(
     polyStatus as any,
-    (res) => {
+    (res: any) => {
       setTimeout(() => {
-        cb(toRaw(res as any));
+        cb(toRaw(res));
       }, 0);
     },
     { immediate: true }
